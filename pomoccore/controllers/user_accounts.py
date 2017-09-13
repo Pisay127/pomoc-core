@@ -5,9 +5,9 @@
 class UsersController(object):
     def on_get(self, req, resp):
         quote = {
-            'quote': {
+            'quote': (
                 "I've always been interested in the future than in the past."
-            },
+            ),
             'author': "Grace Hopper"
         }
 
