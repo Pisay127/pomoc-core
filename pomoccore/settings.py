@@ -6,7 +6,7 @@ import os
 # Use ConfigParser in the future.
 
 TOKEN_EXPIRES = 3600
-APP_ENV = os.environ.get('APP_ENV') or 'local'
+APP_ENV = 'dev'  # os.environ.get('APP_ENV') or 'local' Replace this with something from a ConfigParser
 DB_OPTIONS = {
     'pool_recycle': 3600,
     'pool_size': 10,
@@ -23,8 +23,8 @@ PASSWORD_SCHEMES = [
 ]
 
 if APP_ENV == 'dev' or APP_ENV == 'live':
-    DB_CONFIG = ('username', 'password', 'host', 'database')
+    DB_CONFIG = ('pomoccore_app', '!Pisay127PassesCMSC127!', 'localhost', 'pomoccore')
     DB_URL = 'postgresql+psycopg2://{0}:{1}@{2}/{3}'.format(*DB_CONFIG)
 else:
-    DB_CONFIG = ('host', 'database')
+    DB_CONFIG = ('localhost', 'pomoccore')
     DB_URL = 'postgresql+psycopg2://{0}/{1}'.format(*DB_CONFIG)

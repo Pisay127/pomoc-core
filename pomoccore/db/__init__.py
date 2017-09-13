@@ -10,3 +10,10 @@ from pomoccore import settings
 db_engine = create_engine(settings.DB_URL, **settings.DB_OPTIONS)
 session_factory = sessionmaker(bind=db_engine)
 Session = scoped_session(session_factory)
+
+
+def init_db():
+    Session.configure(bind=db_engine)
+
+    from pomoccore.models.base_model import BaseModel
+    BaseModel.metadata.create_all(db_engine)
