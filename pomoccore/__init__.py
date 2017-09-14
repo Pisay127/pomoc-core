@@ -10,4 +10,4 @@ class API(falcon.API):
     def __init__(self, *args, **kwargs):
         super(API, self).__init__(*args, **kwargs)
 
-        self.add_route('/quote', user_accounts.UsersController())
+        self.add_route('/user', user_accounts.UserController())

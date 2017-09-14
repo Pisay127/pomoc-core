@@ -5,10 +5,6 @@ import sys
 import os
 import time
 from datetime import datetime
-from wsgiref import simple_server
-
-from pomoccore.api import api
-
 
 server_start_time = int(round(time.time() * 1000))
 
@@ -16,6 +12,9 @@ server_start_time = int(round(time.time() * 1000))
 def main():
     module_dir = os.path.abspath(__file__)[:(-1 * len('bin/pomoc-core.py'))]
     sys.path.append(module_dir)
+
+    from wsgiref import simple_server
+    from pomoccore.api import api
 
     _print_server_message('{0} Starting Pomoc Core server at 0.0.0.0:8080'.format(_get_current_datetime()), True)
 
@@ -28,7 +27,7 @@ def main():
 
 
 def _print_server_message(message, postmessage_line=False):
-    line_string = ('-' * len(message)) + ('-' * 3)
+    line_string = '-' * 73
     print(line_string)
     print(message)
 

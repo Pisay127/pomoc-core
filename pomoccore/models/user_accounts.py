@@ -9,7 +9,7 @@ from pomoccore import settings
 from .base_model import BaseModel
 
 
-class Users(BaseModel):
+class User(BaseModel):
 
     __tablename__ = 'user_accounts'
 
