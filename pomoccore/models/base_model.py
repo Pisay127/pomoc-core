@@ -10,11 +10,8 @@ from sqlalchemy.ext.declarative import declarative_base
 class Base(object):
 
     __abstract__ = True
-    date_created = Column(DateTime, default=func.current_timestamp(), nullable=False)
-    date_modified = Column(DateTime,
-                           default=func.current_timestamp(),
-                           onupdate=func.current_timestamp(),
-                           nullable=False
-                          )
+    date_created = Column('date_created', DateTime, default=func.current_timestamp(), nullable=False)
+    date_modified = Column('date_modified', DateTime, default=func.current_timestamp(),
+                           onupdate=func.current_timestamp(), nullable=False)
 
 BaseModel = declarative_base(cls=Base)
