@@ -1,6 +1,7 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
+from .base_model import BaseModel
 from .user import UserModel
 
 
@@ -16,3 +17,7 @@ class Admin(UserModel):
     def __repr__(self):
         return '<Admin {0}, a.k.a. {1}>'.format(self.id_number, self.user.username)
 
+
+class Section(BaseModel):
+
+    __tablename__ = 'section'
