@@ -2,25 +2,22 @@
 # See the file 'LICENSE' for the full license governing this code.
 
 from sqlalchemy import Column
-from sqlalchemy import Text
 from sqlalchemy import SmallInteger
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .user import UserModel
 
 
-class Student(BaseModel):
+class Student(UserModel):
 
-    __tablename__ = 'students'
+    __tablename__ = 'student_account'
 
-    id_number = Column('id_number', Text, ForeignKey('users.id_number'),
-                       primary_key=True, unique=True, nullable=False)
     year_level = Column('year_level', SmallInteger, nullable=False)
-    user = relationship('User', backref='students', uselist=False)
 
-    def __init__(self, id_number, year_level):
-        self.id_number = id_number
+    def __init__(self, id_number, username, password, first_name,
+                 middle_name, last_name, age, birth_date, year_level,
+                 profile_picture=None):
+        super(Student, self).__init__(id_number, username, password, first_name,
+                                      middle_name, last_name, age, birth_date, profile_picture)
         self.year_level = year_level
 
     def __repr__(self):

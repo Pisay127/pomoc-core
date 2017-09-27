@@ -16,4 +16,16 @@ def init_db():
     Session.configure(bind=db_engine)
 
     from pomoccore.models.base_model import BaseModel
+    from pomoccore.models.user import UserModel
+
+    # noinspection PyUnresolvedReferences
+    from pomoccore.models.student import Student
+
+    # noinspection PyUnresolvedReferences
+    from pomoccore.models.teacher import Teacher
+
+    # noinspection PyUnresolvedReferences
+    from pomoccore.models.admin import Admin
+
     BaseModel.metadata.create_all(db_engine)
+    UserModel.metadata.create_all(db_engine)
