@@ -15,3 +15,6 @@ class Teacher(UserModel):
 
     def __repr__(self):
         return '<Teacher {0}, a.k.a. {1}>'.format(self.id_number, self.user.username)
+
+# TODO: Add TeacherPosition model
+# TODO: Add TeacherPositionList model

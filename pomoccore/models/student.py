@@ -37,7 +37,7 @@ class StudentSection(BaseModel):
                                            ['section.section_name', 'section.year_level']),)
 
     student_number = Column('student_number', Text,
-                            ForeignKey('student_account.id_number',),
+                            ForeignKey('student_account.id_number', ),
                             primary_key=True, nullable=False)
     section_name = Column('section_name', Text, primary_key=True, nullable=False)
     year_level = Column('year_level', SmallInteger, primary_key=True, nullable=False)
@@ -161,3 +161,8 @@ class StudentStatus(BaseModel):
 
     def __repr__(self):
         return '<StudentStatus {0} - {1}>'.format(self.student_number, self.quarter)
+
+# TODO: Add StudentSubject model
+# TODO: Add StudentSubjectGrade model
+# TODO: Add StudentSubjectGradeApproval model
+
