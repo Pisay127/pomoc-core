@@ -1,9 +1,9 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
+from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import Boolean
-from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
 
