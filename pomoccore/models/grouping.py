@@ -6,6 +6,7 @@ from sqlalchemy import Integer
 from sqlalchemy import Boolean
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
+from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -20,6 +21,7 @@ class Section(BaseModel):
     active = Column('active', Boolean, nullable=False, default=True)
 
     students = relationship('StudentSection', backref='section')
+    advisors = relationship('SectionAdvisor', backref='section')
 
     def __init__(self, section_name, year_level, active=True):
         self.section_name = section_name
@@ -34,9 +36,13 @@ class SectionAdvisor(BaseModel):
 
     __tablename__ = 'section_advisor'
 
-    section_name = Column('section_name', Text, primary_key=True, nullable=False)
+    section_name = Column('section_name', Text,
+                          ForeignKey('section.section_name', onupdate='cascade', ondelete='cascade'),
+                          primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
-    advisor = Column('advisor', Text, nullable=False)
+    advisor = Column('advisor', Text,
+                     ForeignKey('teacher_accounts.id', onupdate='cascade', ondelete='cascade'),
+                     nullable=False)
 
     def __init__(self, section_name, school_year, advisor):
         self.section_name = section_name
@@ -54,6 +60,7 @@ class Batch(BaseModel):
     batch_year = Column('batch', Integer, primary_key=True, nullable=False)
 
     students = relationship('StudentBatch', backref='batch')
+    advisors = relationship('BatchAdvisor', backref='batch')
 
     def __init__(self, batch_year):
         self.batch_year = batch_year
@@ -66,9 +73,13 @@ class BatchAdvisor(BaseModel):
 
     __tablename__ = 'batch_advisor'
 
-    batch_year = Column('batch_year', Integer, primary_key=True, nullable=False)
+    batch_year = Column('batch_year', Integer,
+                        ForeignKey('batch.batch_year', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
-    advisor = Column('advisor', Text, primary_key=True, nullable=False)
+    advisor = Column('advisor', Text,
+                     ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
+                     primary_key=True, nullable=False)
 
     def __init__(self, batch_year, school_year, advisor):
         self.batch_year = batch_year
