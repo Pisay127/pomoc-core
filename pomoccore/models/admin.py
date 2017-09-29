@@ -20,18 +20,3 @@ class Admin(UserModel):
 
     def __repr__(self):
         return '<Admin {0}, a.k.a. {1}>'.format(self.id_number, self.user.username)
-
-
-class StudentCharacterRatingCriteria(BaseModel):
-
-    __tablename__ = 'student_character_rating_criteria'
-
-    criterion_id = Column('criterion_id', SmallInteger, primary_key=True, nullable=False)
-    criterion_description = Column('criterion_description', Text, primary_key=True, nullable=False)
-
-    def __init__(self, criterion_id, criterion_description):
-        self.criterion_id = criterion_id
-        self.criterion_description = criterion_description
-
-    def __repr__(self):
-        return '<StudentCharacterRatingCriteria {0}'.format(self.criterion_id)
