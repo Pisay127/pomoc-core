@@ -17,6 +17,7 @@ class Teacher(UserModel):
     pending_subject_grades = relationship('StudentSubjectPendingGrade', backref='teacher_account')
     section_advisories = relationship('SectionAdvisor', backref='teacher_account')
     batch_advisories = relationship('BatchAdvisor', backref='teacher_account')
+    subjects = relationship('SubjectOffering', backref='teacher_account')
 
     def __init__(self, id_number, username, password, first_name,
                  middle_name, last_name, age, birth_date, profile_picture=None):
