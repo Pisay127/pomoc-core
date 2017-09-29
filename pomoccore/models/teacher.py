@@ -4,6 +4,7 @@
 from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import Boolean
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 from .user import UserModel
@@ -12,6 +13,8 @@ from .user import UserModel
 class Teacher(UserModel):
 
     __tablename__ = 'teacher_account'
+
+    pending_subject_grades = relationship('StudentSubjectPendingGrade', backref='teacher_account')
 
     def __init__(self, id_number, username, password, first_name,
                  middle_name, last_name, age, birth_date, profile_picture=None):

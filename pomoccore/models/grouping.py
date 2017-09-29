@@ -6,21 +6,9 @@ from sqlalchemy import Integer
 from sqlalchemy import Boolean
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-
-
-class Batch(BaseModel):
-
-    __tablename__ = 'batch'
-
-    batch_year = Column('batch', Integer, primary_key=True, nullable=False)
-
-    def __init__(self, batch_year):
-        self.batch_year = batch_year
-
-    def __repr__(self):
-        return '<Batch {0}>'.format(self.batch_year)
 
 
 class Section(BaseModel):
@@ -30,6 +18,8 @@ class Section(BaseModel):
     section_name = Column('section_name', Text, primary_key=True, nullable=False)
     year_level = Column('year_level', SmallInteger, primary_key=True, nullable=False)
     active = Column('active', Boolean, nullable=False, default=True)
+
+    students = relationship('StudentSection', backref='section')
 
     def __init__(self, section_name, year_level, active=True):
         self.section_name = section_name
@@ -55,6 +45,21 @@ class SectionAdvisor(BaseModel):
 
     def __repr__(self):
         return '<SectionAdvisor {0} - {1} (S.Y. {2})>'.format(self.advisor, self.section_name, self.school_year)
+
+
+class Batch(BaseModel):
+
+    __tablename__ = 'batch'
+
+    batch_year = Column('batch', Integer, primary_key=True, nullable=False)
+
+    students = relationship('StudentBatch', backref='batch')
+
+    def __init__(self, batch_year):
+        self.batch_year = batch_year
+
+    def __repr__(self):
+        return '<Batch {0}>'.format(self.batch_year)
 
 
 class BatchAdvisor(BaseModel):

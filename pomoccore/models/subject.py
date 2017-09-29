@@ -5,6 +5,7 @@ from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
 from sqlalchemy import Boolean
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 
@@ -37,6 +38,8 @@ class SubjectOffering(BaseModel):
     year_level = Column('year_level', SmallInteger, nullable=False)
     instructor = Column('instructor', Text, primary_key=True, nullable=False)
     schedule = Column('schedule', Text, nullable=False)
+
+    students = relationship('StudentSubject', backref='subject_offering')
 
     def __init__(self, subject_name, school_year, year_level, instructor, schedule):
         self.subject_name = subject_name
