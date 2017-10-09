@@ -6,6 +6,7 @@ from sqlalchemy import Integer
 from sqlalchemy import Boolean
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
+from sqlalchemy import BigInteger
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -16,17 +17,16 @@ class Section(BaseModel):
 
     __tablename__ = 'section'
 
-    section_name = Column('section_name', Text, primary_key=True, nullable=False)
+    section_id = Column('id', BigInteger, nullable=False, autoincrement=True, unique=True)
+    section_name = Column('section_name', Text, nullable=False, unique=True)
     year_level = Column('year_level', SmallInteger, primary_key=True, nullable=False)
-    active = Column('active', Boolean, nullable=False, default=True)
 
     students = relationship('StudentSection', backref='section')
     advisors = relationship('SectionAdvisor', backref='section')
 
-    def __init__(self, section_name, year_level, active=True):
+    def __init__(self, section_name, year_level):
         self.section_name = section_name
         self.year_level = year_level
-        self.active = active
 
     def __repr__(self):
         return '<Section {0}'.format(self.section_name)
@@ -36,9 +36,9 @@ class SectionAdvisor(BaseModel):
 
     __tablename__ = 'section_advisor'
 
-    section_name = Column('section_name', Text,
-                          ForeignKey('section.section_name', onupdate='cascade', ondelete='cascade'),
-                          primary_key=True, nullable=False)
+    section_id = Column('section_id', Text,
+                        ForeignKey('section.id', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
     advisor = Column('advisor', Text,
                      ForeignKey('teacher_accounts.id', onupdate='cascade', ondelete='cascade'),
@@ -50,7 +50,7 @@ class SectionAdvisor(BaseModel):
         self.advisor = advisor
 
     def __repr__(self):
-        return '<SectionAdvisor {0} - {1} (S.Y. {2})>'.format(self.advisor, self.section_name, self.school_year)
+        return '<SectionAdvisor {0} - {1} (S.Y. {2})>'.format(self.advisor, self.section_id, self.school_year)
 
 
 class Batch(BaseModel):

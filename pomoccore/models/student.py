@@ -4,6 +4,7 @@
 from sqlalchemy import Column
 from sqlalchemy import SmallInteger
 from sqlalchemy import Integer
+from sqlalchemy import BigInteger
 from sqlalchemy import Text
 from sqlalchemy import CHAR
 from sqlalchemy import DECIMAL
@@ -12,13 +13,15 @@ from sqlalchemy.schema import ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .user import UserModel
 
 
-class Student(UserModel):
+class Student(BaseModel):
 
     __tablename__ = 'student_account'
 
+    student_id = Column('id', BigInteger,
+                        ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False, unique=True)
     year_level = Column('year_level', SmallInteger, nullable=False)
 
     sections = relationship('StudentSection', backref='student_account')
@@ -30,15 +33,12 @@ class Student(UserModel):
     subject_grades = relationship('StudentSubjectGrade', backref='student_account')
     pending_subject_grades = relationship('StudentSubjectPendingGrade', backref='student_account')
 
-    def __init__(self, id_number, username, password, first_name,
-                 middle_name, last_name, age, birth_date, year_level,
-                 profile_picture=None):
-        super(Student, self).__init__(id_number, username, password, first_name,
-                                      middle_name, last_name, age, birth_date, profile_picture)
+    def __init__(self, student_id, year_level):
+        self.student_id = student_id
         self.year_level = year_level
 
     def __repr__(self):
-        return '<Student {0}, a.k.a. {1}>'.format(self.id_number, self.user.username)
+        return '<Student {0}>'.format(self.student_id)
 
 
 class StudentSection(BaseModel):
@@ -47,7 +47,7 @@ class StudentSection(BaseModel):
     __table_args__ = (ForeignKeyConstraint(['section_name', 'year_level'],
                                            ['section.section_name', 'section.year_level']),)
 
-    student_id = Column('student_id', Text,
+    student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     section_name = Column('section_name', Text,
@@ -72,7 +72,7 @@ class StudentRating(BaseModel):
 
     __tablename__ = 'student_rating'
 
-    student_id = Column('student_id', Text,
+    student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     criterion_id = Column('criterion_id', SmallInteger,
@@ -116,7 +116,7 @@ class StudentBatch(BaseModel):
 
     __tablename__ = 'student_batch'
 
-    student_id = Column('student_id', Text,
+    student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     batch_year = Column('batch_year', Integer,
@@ -154,7 +154,7 @@ class StudentMonthlyAttendance(BaseModel):
                                            ['student_monthly_required_days.month',
                                             'student_monthly_required_days.school_year']),)
 
-    student_id = Column('student_id', Text,
+    student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     month = Column('month', SmallInteger,
@@ -190,7 +190,7 @@ class StudentStatus(BaseModel):
 
     __tablename__ = 'student_status'
 
-    student_id = Column('student_id', Text,
+    student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     status = Column('status', Text, primary_key=True, nullable=False)
@@ -212,31 +212,31 @@ class StudentStatus(BaseModel):
 class StudentSubject(BaseModel):
 
     __tablename__ = 'student_subject'
-    __table_args__ = (ForeignKeyConstraint(['subject_name', 'school_year', 'instructor'],
-                                           ['subject_offering.subject_name',
+    __table_args__ = (ForeignKeyConstraint(['subject_id', 'school_year', 'instructor_id'],
+                                           ['subject_offering.subject_id',
                                             'subject_offering.school_year',
-                                            'subject_offering.instructor']),)
+                                            'subject_offering.instructor_id']),)
 
-    student_id = Column('student_id', Text,
+    student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
-    subject_name = Column('student_name', Text,
-                          ForeignKey('subject_offering.subject_name', onupdate='cascade', ondelete='cascade'),
-                          primary_key=True, nullable=False)
+    subject_id = Column('student_id', Text,
+                        ForeignKey('subject_offering.subject_name', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False)
     school_year = Column('school_year', Text,
                          ForeignKey('subject_offering.school_year', onupdate='cascade', ondelete='cascade'),
                          primary_key=True, nullable=False)
-    instructor = Column('instructor', Text,
-                        ForeignKey('subject_offering.instructor', onupdate='cascade', ondelete='cascade'),
-                        nullable=False)
+    instructor_id = Column('instructor_id', Text,
+                           ForeignKey('subject_offering.instructor_id', onupdate='cascade', ondelete='cascade'),
+                           nullable=False)
 
     subject_grades = relationship('StudentSubjectGrade', backref='student_subject')
 
-    def __init__(self, student_id, subject_name, school_year, instructor):
+    def __init__(self, student_id, subject_id, school_year, instructor_id):
         self.student_id = student_id
-        self.subject_name = subject_name
+        self.subject_id = subject_id
         self.school_year = school_year
-        self.instructor = instructor
+        self.instructor_id = instructor_id
 
     def __repr__(self):
         return '<StudentSubject {0} - {1}'.format(self.subject_name, self.student_id)
@@ -245,13 +245,13 @@ class StudentSubject(BaseModel):
 class StudentSubjectGrade(BaseModel):
 
     __tablename__ = 'student_subject_grade'
-    __table_args__ = (ForeignKeyConstraint(['subject_name', 'school_year'],
-                                           ['student_subject.subject_name', 'student_subject.school_year']),)
+    __table_args__ = (ForeignKeyConstraint(['subject_id', 'school_year'],
+                                           ['student_subject.subject_id', 'student_subject.school_year']),)
 
-    student_id = Column('student_id', Text, primary_key=True, nullable=False)
-    subject_name = Column('subject_name', Text,
-                          ForeignKey('student_subject.subject_name', onupdate='cascade', ondelete='cascade'),
-                          primary_key=True, nullable=False)
+    student_id = Column('student_id', BigInteger, primary_key=True, nullable=False)
+    subject_id = Column('subject_id', Text,
+                        ForeignKey('student_subject.subject_id', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False)
     school_year = Column('school_year', Text,
                          ForeignKey('student_subject.school_year', onupdate='cascade', ondelete='cascade'),
                          primary_key=True, nullable=False)
@@ -261,34 +261,34 @@ class StudentSubjectGrade(BaseModel):
     pending_grades = relationship('StudentSubjectPendingGrade', backref='student_subject_grade',
                                   uselist=False)
 
-    def __init__(self, student_id, subject_name, school_year, quarter, grade):
+    def __init__(self, student_id, subject_id, school_year, quarter, grade):
         self.student_id = student_id
-        self.subject_name = subject_name
+        self.subject_id = subject_id
         self.school_year = school_year
         self.quarter = quarter
         self.grade = grade
 
     def __repr__(self):
-        return '<StudentSubjectGrade {0} ({1}) - {2}'.format(self.subject_name, self.grade, self.student_id)
+        return '<StudentSubjectGrade {0} ({1}) - {2}'.format(self.subject_id, self.grade, self.student_id)
 
 
 class StudentSubjectPendingGrade(BaseModel):
 
     __tablename__ = 'student_subject_pending_grade'
-    __table_args__ = (ForeignKeyConstraint(['subject_name', 'school_year', 'quarter'],
-                                           ['student_subject_grade.subject_name',
+    __table_args__ = (ForeignKeyConstraint(['subject_id', 'school_year', 'quarter'],
+                                           ['student_subject_grade.subject_id',
                                             'student_subject_grade.school_year',
                                             'student_subject_grade.quarter']),)
 
-    student_id = Column('student_id', Text,
+    student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
-    subject_name = Column('subject_name', Text,
-                          ForeignKey('student_subject_grade.subject_name', onupdate='cascade', ondelete='cascade'),
-                          primary_key=True, nullable=False)
-    requesting_teacher = Column('requesting_teacher', Text,
-                                ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
-                                nullable=False)
+    subject_id = Column('subject_id', Text,
+                        ForeignKey('student_subject_grade.subject_id', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False)
+    requesting_teacher_id = Column('requesting_teacher_id', Text,
+                                   ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
+                                   nullable=False)
     school_year = Column('school_year', Text,
                          ForeignKey('student_subject_grade.school_year', onupdate='cascade', ondelete='cascade'),
                          primary_key=True, nullable=False)
@@ -297,15 +297,15 @@ class StudentSubjectPendingGrade(BaseModel):
                      primary_key=True, nullable=False)
     proposed_grade = Column('proposed_grade', DECIMAL, nullable=False)
 
-    def __init__(self, student_id, subject_name, requesting_teacher, school_year, quarter, proposed_quarter):
+    def __init__(self, student_id, subject_id, requesting_teacher_id, school_year, quarter, proposed_quarter):
         self.student_id = student_id
-        self.subject_name = subject_name
-        self.requesting_teacher = requesting_teacher
+        self.subject_id = subject_id
+        self.requesting_teacher_id = requesting_teacher_id
         self.school_year = school_year
         self.quarter = quarter
         self.proposed_grade = proposed_quarter
 
     def __repr__(self):
         return '<StudentSubjectPendingGrade {0} (*{1}) - {2}>'.format(self.subject_name,
-                                                                             self.proposed_grade,
-                                                                             self.student_id)
+                                                                      self.proposed_grade,
+                                                                      self.student_id)

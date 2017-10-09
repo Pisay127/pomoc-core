@@ -1,17 +1,22 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
-from .user import UserModel
+from sqlalchemy import Column
+from sqlalchemy import BigInteger
+from sqlalchemy.schema import ForeignKey
+from .base_model import BaseModel
 
 
-class Admin(UserModel):
+class Admin(BaseModel):
 
     __tablename__ = 'admin_account'
 
-    def __init__(self, id_number, username, password, first_name,
-                 middle_name, last_name, age, birth_date, profile_picture=None):
-        super(Admin, self).__init__(id_number, username, password, first_name,
-                                    middle_name, last_name, age, birth_date, profile_picture)
+    admin_id = Column('id', BigInteger,
+                      ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
+                      primary_key=True, nullable=False, unique=True)
+
+    def __init__(self, admin_id):
+        self.admin_id = admin_id
 
     def __repr__(self):
-        return '<Admin {0}, a.k.a. {1}>'.format(self.id_number, self.user.username)
+        return '<Admin {0}'.format(self.admin_id)

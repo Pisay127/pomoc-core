@@ -4,6 +4,8 @@
 from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import Boolean
+from sqlalchemy import BigInteger
+from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -14,26 +16,32 @@ class Teacher(UserModel):
 
     __tablename__ = 'teacher_account'
 
+    teacher_id = Column('id', BigInteger,
+                        ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=True, unique=True)
+
     pending_subject_grades = relationship('StudentSubjectPendingGrade', backref='teacher_account')
     section_advisories = relationship('SectionAdvisor', backref='teacher_account')
     batch_advisories = relationship('BatchAdvisor', backref='teacher_account')
     subjects = relationship('SubjectOffering', backref='teacher_account')
 
-    def __init__(self, id_number, username, password, first_name,
-                 middle_name, last_name, age, birth_date, profile_picture=None):
-        super(Teacher, self).__init__(id_number, username, password, first_name,
-                                      middle_name, last_name, age, birth_date, profile_picture)
+    def __init__(self, teacher_id):
+        self.teacher_id = teacher_id
 
     def __repr__(self):
-        return '<Teacher {0}, a.k.a. {1}>'.format(self.id_number, self.user.username)
+        return '<Teacher {0}>'.format(self.teacher_id)
 
 
 class TeacherPosition(BaseModel):
 
     __tablename__ = 'teacher_position'
 
-    teacher_id = Column('teacher_id', Text, primary_key=True, nullable=False)
-    position_name = Column('position_name', Text, primary_key=True, nullable=False)
+    teacher_id = Column('teacher_id', BigInteger,
+                        ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False)
+    position_id = Column('position_id', Text,
+                         ForeignKey('teacher_position_list.id', onupdate='cascade', ondelete='cascade'),
+                         nullable=False)
     school_year = Column('school_year', Text, nullable=False)
 
     def __init__(self, teacher_id, position_name, school_year):
@@ -51,13 +59,11 @@ class TeacherPositionList(BaseModel):
 
     __tablename__ = 'teacher_position_list'
 
-    position_name = Column('position_name', Text, primary_key=True, nullable=False)
-    active = Column('active', Boolean, nullable=False)
+    position_id = Column('id', BigInteger, primary_key=True, unique=True, nullable=False)
+    position_name = Column('position_name', Text, nullable=False)
 
-    def __init__(self, position_name, active=True):
+    def __init__(self, position_name):
         self.position_name = position_name
-        self.active = active
 
     def __repr__(self):
-        return '<TeacherPositionList {0} ({1})>'.format(self.position_name,
-                                                        'active' if self.active else 'inactive')
+        return '<TeacherPositionList {0}>'.format(self.position_name)
