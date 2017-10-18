@@ -17,9 +17,9 @@ class Section(BaseModel):
 
     __tablename__ = 'section'
 
-    section_id = Column('id', BigInteger, nullable=False, autoincrement=True, unique=True)
+    section_id = Column('id', BigInteger, nullable=False, primary_key=True, autoincrement=True, unique=True)
     section_name = Column('section_name', Text, nullable=False, unique=True)
-    year_level = Column('year_level', SmallInteger, primary_key=True, nullable=False)
+    year_level = Column('year_level', SmallInteger, nullable=False)
 
     students = relationship('StudentSection', backref='section')
     advisors = relationship('SectionAdvisor', backref='section')
@@ -36,12 +36,12 @@ class SectionAdvisor(BaseModel):
 
     __tablename__ = 'section_advisor'
 
-    section_id = Column('section_id', Text,
+    section_id = Column('section_id', BigInteger,
                         ForeignKey('section.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
-    advisor = Column('advisor', Text,
-                     ForeignKey('teacher_accounts.id', onupdate='cascade', ondelete='cascade'),
+    advisor = Column('advisor', BigInteger,
+                     ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
                      nullable=False)
 
     def __init__(self, section_name, school_year, advisor):
@@ -57,7 +57,7 @@ class Batch(BaseModel):
 
     __tablename__ = 'batch'
 
-    batch_year = Column('batch', Integer, primary_key=True, nullable=False)
+    batch_year = Column('batch_year', Integer, primary_key=True, nullable=False)
 
     students = relationship('StudentBatch', backref='batch')
     advisors = relationship('BatchAdvisor', backref='batch')
@@ -77,7 +77,7 @@ class BatchAdvisor(BaseModel):
                         ForeignKey('batch.batch_year', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
-    advisor = Column('advisor', Text,
+    advisor = Column('advisor_id', BigInteger,
                      ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
                      primary_key=True, nullable=False)
 
@@ -87,4 +87,4 @@ class BatchAdvisor(BaseModel):
         self.advisor = advisor
 
     def __repr__(self):
-        return '<BatchAdvisor {0} - {1} (S.Y. {2})'.format(self.advisor, self.batch_year, self.school_year)
+        return '<BatchAdvisor {0} - {1} (S.Y. {2})'.format(self.advisor_Id, self.batch_year, self.school_year)

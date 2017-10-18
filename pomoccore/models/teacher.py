@@ -3,16 +3,14 @@
 
 from sqlalchemy import Column
 from sqlalchemy import Text
-from sqlalchemy import Boolean
 from sqlalchemy import BigInteger
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .user import UserModel
 
 
-class Teacher(UserModel):
+class Teacher(BaseModel):
 
     __tablename__ = 'teacher_account'
 
@@ -39,7 +37,7 @@ class TeacherPosition(BaseModel):
     teacher_id = Column('teacher_id', BigInteger,
                         ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
-    position_id = Column('position_id', Text,
+    position_id = Column('position_id', BigInteger,
                          ForeignKey('teacher_position_list.id', onupdate='cascade', ondelete='cascade'),
                          nullable=False)
     school_year = Column('school_year', Text, nullable=False)
@@ -59,8 +57,10 @@ class TeacherPositionList(BaseModel):
 
     __tablename__ = 'teacher_position_list'
 
-    position_id = Column('id', BigInteger, primary_key=True, unique=True, nullable=False)
+    position_id = Column('id', BigInteger, primary_key=True, unique=True, nullable=False, autoincrement=True)
     position_name = Column('position_name', Text, nullable=False)
+
+    teachers = relationship('TeacherPosition', backref='teacher_position_list')
 
     def __init__(self, position_name):
         self.position_name = position_name

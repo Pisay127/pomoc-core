@@ -11,10 +11,10 @@ from sqlalchemy_utils.types import PasswordType
 
 from pomoccore import settings
 
-from .base_model import Base
+from .base_model import BaseModel
 
 
-class User(Base):
+class User(BaseModel):
 
     __tablename__ = 'user'
 
@@ -50,7 +50,7 @@ class User(Base):
         return '<User {0}>'.format(self.id_number)
 
 
-class UserAccessTokens(Base):
+class UserAccessTokens(BaseModel):
 
     __tablename__ = 'user_access_tokens'
 
@@ -60,3 +60,7 @@ class UserAccessTokens(Base):
     access_token = Column('access_token', BigInteger, nullable=False, unique=True)
 
     # Delete records after an hour.
+
+    def __init__(self, user_id, access_token):
+        self.user_id = user_id
+        self.access_token = access_token

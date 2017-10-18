@@ -17,4 +17,3 @@ def init_db():
     Session.configure(bind=db_engine)
 
     BaseModel.metadata.create_all(db_engine)
-    UserModel.metadata.create_all(db_engine)

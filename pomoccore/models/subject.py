@@ -4,9 +4,7 @@
 from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
-from sqlalchemy import Boolean
 from sqlalchemy import BigInteger
-from sqlalchemy.schema import ForeignKeyConstraint
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -19,7 +17,7 @@ class Subject(BaseModel):
 
     subject_id = Column('id', BigInteger, primary_key=True, nullable=True, autoincrement=True, unique=True)
     subject_name = Column('subject_name', Text, nullable=False)
-    year_level = Column('year_level', SmallInteger, primary_key=True, nullable=False)
+    year_level = Column('year_level', SmallInteger, nullable=False)
 
     offerings = relationship('SubjectOffering', backref='subject')
 
@@ -34,17 +32,12 @@ class Subject(BaseModel):
 class SubjectOffering(BaseModel):
 
     __tablename__ = 'subject_offering'
-    __table_args__ = (ForeignKeyConstraint(['subject_id', 'year_level'],
-                                           ['subject.id', 'subject.year_level']),)
 
-    subject_id = Column('subject_id', Text,
+    subject_id = Column('subject_id', BigInteger,
                         ForeignKey('subject.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
-    year_level = Column('year_level', SmallInteger,
-                        ForeignKey('subject.year_level', onupdate='cascade', ondelete='cascade'),
-                        nullable=False)
-    instructor_id = Column('instructor_id', Text,
+    instructor_id = Column('instructor_id', BigInteger,
                            ForeignKey('teacher_account.id'),
                            primary_key=True, nullable=False)
     schedule = Column('schedule', Text, nullable=False)

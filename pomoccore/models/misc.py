@@ -8,14 +8,14 @@ from sqlalchemy import Text
 from .base_model import BaseModel
 
 
-class SystemWideInfo(BaseModel):
+class VariableSettings(BaseModel):
 
-    __tablename__ = 'system_wide_info'
+    __tablename__ = 'variable_settings'
 
-    current_quarter = Column('current_quarter', SmallInteger, nullable=False)
-    current_school_year = Column('current_school_year', Text, nullable=False)
-    start_month = Column('start_month', SmallInteger, nullable=False)
-    end_month = Column('end_month', SmallInteger, nullable=False)
+    current_quarter = Column('current_quarter', SmallInteger, primary_key=True, nullable=False)
+    current_school_year = Column('current_school_year', Text, primary_key=True, nullable=False)
+    start_month = Column('start_month', SmallInteger, primary_key=True, nullable=False)
+    end_month = Column('end_month', SmallInteger, primary_key=True, nullable=False)
 
     def __init__(self, current_quarter, current_school_year, start_month, end_month):
         self.current_quarter = current_quarter
