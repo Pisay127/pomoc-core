@@ -1,11 +1,10 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
-import os
-
 # Use ConfigParser in the future.
 
 TOKEN_EXPIRES = 3600
+SERVER_SECRET = 'qqw#33A4dT4VnZ!m+7ewEQ2+JZk$T&8U2L&SQ+^J_h9$bQVX2*m$jMvWMUr@MGJj'  # Change this in production.
 APP_ENV = 'dev'  # os.environ.get('APP_ENV') or 'local' Replace this with something from a ConfigParser
 DB_OPTIONS = {
     'pool_recycle': 3600,
@@ -19,7 +18,7 @@ DB_OPTIONS = {
 }
 
 PASSWORD_SCHEMES = [
-    'pbkdf2_sha512'
+    'pbkdf2_sha256'
 ]
 
 if APP_ENV == 'dev' or APP_ENV == 'live':
