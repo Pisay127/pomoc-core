@@ -3,7 +3,9 @@
 
 # Use ConfigParser in the future.
 
-TOKEN_EXPIRES = 3600
+ACCESS_TOKEN_EXPIRES = 86400
+REFRESH_TOKEN_EXPIRES = 259200
+TOKEN_SECRET_LENGTH = 32
 SERVER_SECRET = 'qqw#33A4dT4VnZ!m+7ewEQ2+JZk$T&8U2L&SQ+^J_h9$bQVX2*m$jMvWMUr@MGJj'  # Change this in production.
 APP_ENV = 'dev'  # os.environ.get('APP_ENV') or 'local' Replace this with something from a ConfigParser
 DB_OPTIONS = {
@@ -22,8 +24,8 @@ PASSWORD_SCHEMES = [
 ]
 
 if APP_ENV == 'dev' or APP_ENV == 'live':
-    DB_CONFIG = ('pomoccore_app', '!Pisay127PassesCMSC127!', 'localhost', 'pomoccore')
+    DB_CONFIG = ('pomoccore_app', '!Pisay127PassesCMSC127!', 'localhost', 'pomoccore_db')
     DB_URL = 'postgresql+psycopg2://{0}:{1}@{2}/{3}'.format(*DB_CONFIG)
 else:
-    DB_CONFIG = ('localhost', 'pomoccore')
+    DB_CONFIG = ('localhost', 'pomoccore_db')
     DB_URL = 'postgresql+psycopg2://{0}/{1}'.format(*DB_CONFIG)

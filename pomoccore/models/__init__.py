@@ -54,5 +54,4 @@ __all__ = [
     'VariableSettings',
     'Admin',
     'ClientApp',
-    'UserAccessTokens',
 ]

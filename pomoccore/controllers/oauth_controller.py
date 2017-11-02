@@ -29,8 +29,6 @@ class OAuthController(object):
         try:
             request_json = json.loads(oauth_request, encoding='utf-8')
             grant_type = request_json['grant_type']
-            username = request_json['username']
-            password = request_json['password']
             client_id = request_json['client_id']
             client_secret = request_json['client_secret']
 
@@ -42,33 +40,13 @@ class OAuthController(object):
             ).scalar()
 
             if client_authenticated:
-                client_is_first_party = db.Session.query(
-                    exists().where(FirstPartyApp.app_id == client_id)
-                ).scalar()
-
-                if client_is_first_party and grant_type == 'password':
-                    current_user = db.Session.query(User).filter_by(username=username, password=password).one()
-                    if current_user is None:
-                        resp.status = falcon.HTTP_401
-                        resp.body = json.dumps(
-                            OAuthController._get_error_response(
-                                401,
-                                'Unauthorized',
-                                'Authentication failure. Incorrect username/password combination.'
-                            )
-                        )
-                    else:
-                        resp.status = falcon.HTTP_200
-                        resp.body = json.dumps({
-                            'token_type': "bearer",
-                            'access_token': OAuthController._generate_access_token(username),
-                            'refresh_token': OAuthController._generate_refresh_token(32)
-                        })
-                else:
-                    resp.status = falcon.HTTP_403
-                    resp.body = json.dumps(
-                        OAuthController._get_error_response(403, 'Forbidden', 'Client must be a first party app.')
-                    )
+                if grant_type == 'password':
+                    username = request_json['username']
+                    password = request_json['password']
+                    resp = OAuthController._perform_password_grant(resp, client_id, username, password)
+                elif grant_type == 'client_credentials':
+                    # No scope for now.
+                    resp = OAuthController._perform_client_credentials_grant(resp, client_id)
             else:
                 resp.status = falcon.HTTP_401
                 resp.body = json.dumps(
@@ -78,14 +56,71 @@ class OAuthController(object):
             raise falcon.HTTPError(falcon.HTTP_400, 'Malformed JSON', 'Could not decode the request body.')
 
     @staticmethod
-    def _generate_access_token(username):
+    def _perform_client_credentials_grant(resp, client_id):
+        client_is_first_party = db.Session.query(
+            exists().where(FirstPartyApp.app_id == client_id)
+        ).scalar()  # Only allow Client Credentials Grant for first-party apps for now.
+
+        if client_is_first_party:
+            resp.status = falcon.HTTP_200
+            resp.body = json.dumps({
+                'token_type': "bearer",
+                'access_token': OAuthController._generate_access_token(client_id)
+            })
+        else:
+            resp.status = falcon.HTTP_403
+            resp.body = json.dumps(
+                OAuthController._get_error_response(403, 'Forbidden', 'Client must be a first party app.')
+            )
+
+        return resp
+
+    @staticmethod
+    def _perform_password_grant(resp, client_id, username, password):
+        client_is_first_party = db.Session.query(
+            exists().where(FirstPartyApp.app_id == client_id)
+        ).scalar()
+
+        if client_is_first_party:
+            current_user = db.Session.query(User).filter_by(username=username, password=password).one()
+            if current_user is None:
+                resp.status = falcon.HTTP_401
+                resp.body = json.dumps(
+                    OAuthController._get_error_response(
+                        401,
+                        'Unauthorized',
+                        'Authentication failure. Incorrect username/password combination.'
+                    )
+                )
+            else:
+                access_token = OAuthController._generate_access_token(username)
+                refresh_token = OAuthController._generate_refresh_token(settings.TOKEN_SECRET_LENGTH)
+
+                # Store refresh token to DB
+
+                resp.status = falcon.HTTP_200
+                resp.body = json.dumps({
+                    'token_type': "bearer",
+                    'access_token': access_token,
+                    'refresh_token': refresh_token
+                })
+        else:
+            resp.status = falcon.HTTP_403
+            resp.body = json.dumps(
+                OAuthController._get_error_response(403, 'Forbidden', 'Client must be a first party app.')
+            )
+
+        return resp
+
+    @staticmethod
+    def _generate_access_token(subject):
         return jwt.encode(
             {
                 'iss': "/",  # Whole site
                 'aud': "/",  # Whole site (again)
-                'sub': username,
+                'sub': subject,
                 'iat': time.time(),
-                'exp': time.time() + settings.TOKEN_EXPIRES,
+                'exp': time.time() + settings.ACCESS_TOKEN_EXPIRES
             },
             settings.SERVER_SECRET,
             algorithm='HS256'
