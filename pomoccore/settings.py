@@ -3,7 +3,7 @@
 
 # Use ConfigParser in the future.
 
-ACCESS_TOKEN_EXPIRES = 86400
+ACCESS_TOKEN_EXPIRES = 3600
 REFRESH_TOKEN_EXPIRES = 259200
 TOKEN_SECRET_LENGTH = 32
 SERVER_SECRET = 'qqw#33A4dT4VnZ!m+7ewEQ2+JZk$T&8U2L&SQ+^J_h9$bQVX2*m$jMvWMUr@MGJj'  # Change this in production.

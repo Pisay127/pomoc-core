@@ -56,6 +56,9 @@ class OAuthController(object):
         except ValueError:
             raise falcon.HTTPError(falcon.HTTP_400, 'Malformed JSON', 'Could not decode the request body.')
 
+    #@staticmethod
+    #def _perform_refresh_token_grant():
+
     @staticmethod
     def _perform_client_credentials_grant(resp, client_id):
         client_is_first_party = db.Session.query(

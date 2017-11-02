@@ -4,8 +4,10 @@
 from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import CHAR
+from sqlalchemy import BigInteger
 from sqlalchemy_utils import PasswordType
 from sqlalchemy.schema import ForeignKey
+from sqlalchemy.schema import UniqueConstraint
 
 from pomoccore import settings
 
@@ -38,5 +40,16 @@ class FirstPartyApp(BaseModel):
         self.app_id = app_id
 
 
-# class RefreshTokens()
+class RefreshTokens(BaseModel):
+
+    __tablename__ = 'refresh_tokens'
+
+    user_id = Column('user_id', BigInteger,
+                     ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
+                     primary_key=True, nullable=True)
+    refresh_token = Column('refresh_token', Text, primary_key=True, nullable=False)
+
+    __table_args__ = (UniqueConstraint('user_id', 'refresh_token'),)
+
+
 # class BlackListedAccessTokens()
