@@ -3,7 +3,7 @@
 
 from sqlalchemy import Column
 from sqlalchemy import Text
-from sqlalchemy import BigInteger
+from sqlalchemy import CHAR
 from sqlalchemy_utils import PasswordType
 from sqlalchemy.schema import ForeignKey
 
@@ -16,7 +16,7 @@ class ClientApp(BaseModel):
 
     __tablename__ = 'client_app'
 
-    app_id = Column('app_id', BigInteger, nullable=False, unique=True, primary_key=True)
+    app_id = Column('app_id', CHAR(settings.TOKEN_SECRET_LENGTH), nullable=False, unique=True, primary_key=True)
     app_secret = Column('app_secret', PasswordType(schemes=settings.PASSWORD_SCHEMES), nullable=False)
     scope = Column('scope', Text, nullable=True)  # Nullable since scope is optional
 
@@ -30,7 +30,7 @@ class FirstPartyApp(BaseModel):
 
     __tablename__ = 'first_party_app'
 
-    app_id = Column('app_id', BigInteger,
+    app_id = Column('app_id', CHAR(settings.TOKEN_SECRET_LENGTH),
                     ForeignKey('client_app.app_id', onupdate='cascade', ondelete='cascade'),
                     primary_key=True, nullable=False, unique=True)
 

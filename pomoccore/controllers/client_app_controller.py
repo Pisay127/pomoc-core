@@ -18,16 +18,14 @@ class ClientAppController(object):
         try:
             raw_app_info = (req.stream.read()).decode('utf-8')
         except Exception as ex:
-            raise falcon.HTTPError(falcon.HTTP_400, 'Something went wrong', ex.message)
+            raise falcon.HTTPError(falcon.HTTP_400, 'Something went wrong', str(ex))
 
         try:
-            app_info = json.loads(raw_user_info, encoding='utf-8')
-            app_id = app_info['app_id']
-
-            app_secret = ClientAppController._generate_app_secret(settings.TOKEN_SECRET_LENGTH)
+            app_id = ClientAppController._generate_app_token(settings.TOKEN_SECRET_LENGTH)
+            app_secret = ClientAppController._generate_app_token(settings.TOKEN_SECRET_LENGTH)
 
             client_app = ClientApp(app_id, app_secret)
-            first_party_app = FirstPartyApp(app_id)  # We should set it to first party for now.
+            first_party_app = FirstPartyApp(app_id)  # We should make it a first party for now.
             db.Session.add(client_app)
             db.Session.add(first_party_app)
             db.Session.commit()
@@ -35,14 +33,14 @@ class ClientAppController(object):
             raise falcon.HTTPError(falcon.HTTP_400, 'Malformed JSON', 'Could not decode the request body.')
 
         resp.status = falcon.HTTP_201
-        resp.body = json.dumps({'message': "success", 'client_secret': app_secret})
+        resp.body = json.dumps({'message': "success", 'client_id': app_id, 'client_secret': app_secret})
 
     @staticmethod
-    def _generate_app_secret(secret_length):
-        secret = ''
+    def _generate_app_token(secret_length):
+        token = ''
         symbol_set = string.ascii_letters + string.digits + '!@#$%^&*()_+-='
 
         for _ in range(0, secret_length):
-            secret += random.choice(symbol_set)
+            token += random.choice(symbol_set)
 
-        return secret
+        return token

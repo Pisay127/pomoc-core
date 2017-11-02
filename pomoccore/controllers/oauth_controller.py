@@ -10,7 +10,7 @@ import falcon
 import jwt
 
 from sqlalchemy import exists
-from sqlalchemy import and_
+from sqlalchemy.orm.exc import NoResultFound
 
 from pomoccore import db
 from pomoccore import settings
@@ -24,7 +24,7 @@ class OAuthController(object):
         try:
             oauth_request = (req.stream.read()).decode('utf-8')
         except Exception as ex:
-            raise falcon.HTTPError(falcon.HTTP_400, 'Something went wrong', ex.message)
+            raise falcon.HTTPError(falcon.HTTP_400, 'Something went wrong', str(ex))
 
         try:
             request_json = json.loads(oauth_request, encoding='utf-8')
@@ -32,12 +32,11 @@ class OAuthController(object):
             client_id = request_json['client_id']
             client_secret = request_json['client_secret']
 
-            # We did it this way so that we would be able to easily support future OAuth 2.0 flows.
-            client_authenticated = db.Session.query(
-                exists().where(and_(
-                    ClientApp.app_id == client_id, ClientApp.app_secret == client_secret
-                ))
-            ).scalar()
+            try:
+                queried_client = db.Session.query(ClientApp).filter(ClientApp.app_id == client_id).one()
+                client_authenticated = (queried_client.app_secret == client_secret)
+            except NoResultFound:
+                client_authenticated = False
 
             if client_authenticated:
                 if grant_type == 'password':
@@ -50,7 +49,9 @@ class OAuthController(object):
             else:
                 resp.status = falcon.HTTP_401
                 resp.body = json.dumps(
-                    OAuthController._get_error_response(401, 'Unauthorized', 'Client ID does not exist.')
+                    OAuthController._get_error_response(
+                        401,'Unauthorized', 'Client ID does not exist or the secret is incorrect.'
+                    )
                 )
         except ValueError:
             raise falcon.HTTPError(falcon.HTTP_400, 'Malformed JSON', 'Could not decode the request body.')
@@ -65,7 +66,7 @@ class OAuthController(object):
             resp.status = falcon.HTTP_200
             resp.body = json.dumps({
                 'token_type': "bearer",
-                'access_token': OAuthController._generate_access_token(client_id)
+                'access_token': OAuthController._generate_access_token(client_id).decode('utf-8')
             })
         else:
             resp.status = falcon.HTTP_403
@@ -93,8 +94,10 @@ class OAuthController(object):
                     )
                 )
             else:
-                access_token = OAuthController._generate_access_token(username)
-                refresh_token = OAuthController._generate_refresh_token(settings.TOKEN_SECRET_LENGTH)
+                access_token = OAuthController._generate_access_token(username).decode('utf-8')
+                refresh_token = OAuthController._generate_refresh_token(
+                    settings.TOKEN_SECRET_LENGTH
+                ).decode('utf-8')
 
                 # Store refresh token to DB
 

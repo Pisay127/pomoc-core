@@ -11,5 +11,5 @@ class API(falcon.API):
     def __init__(self, *args, **kwargs):
         super(API, self).__init__(*args, **kwargs)
 
-        self.add_route('/client_app', client_app_controller.ClientAppController)
-        self.add_route('/oauth', oauth_controller.OAuthController)
+        self.add_route('/client_app', client_app_controller.ClientAppController())
+        self.add_route('/oauth', oauth_controller.OAuthController())
