@@ -1,6 +1,8 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
+from datetime import datetime
+
 from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
@@ -39,8 +41,8 @@ class User(BaseModel):
         self.first_name = first_name.strip()
         self.middle_name = middle_name.strip()
         self.last_name = last_name.strip()
-        self.age = age.strip()
-        self.birth_date = birth_date  # Note to convert `birth_date` to something matches its type (DateTime)
+        self.age = age
+        self.birth_date = datetime.strptime(birth_date, '%Y-%m-%d %H:%M:%S.%f')
 
         if profile_picture:
             self.profile_picture = profile_picture
