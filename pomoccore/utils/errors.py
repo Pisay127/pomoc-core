@@ -85,3 +85,15 @@ class APINotFoundError(APIError):
             headers=None,
             code=falcon.HTTP_NOT_FOUND
         )
+
+class APIConflictError(APIError):
+    def __init__(self,
+                 title='We need a title, Ignacio!',
+                 description='I told you for the nth time, Ignacio, that we need the error message!'):
+        super(APIConflictError, self).__init__(
+            status=http_status.HTTP_409,
+            title=title,
+            description=description,
+            headers=None,
+            code=falcon.HTTP_CONFLICT
+        )
