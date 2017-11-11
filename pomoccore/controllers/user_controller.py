@@ -11,6 +11,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from pomoccore import db
 from pomoccore import settings
+from pomoccore import utils
 from pomoccore.models import User
 
 
@@ -20,7 +21,7 @@ class UserController(object):
             user_info_request = (req.stream.read()).decode('utf-8')
         except Exception as ex:
             resp.status = falcon.HTTP_400
-            resp.body = UserController._get_error_response(
+            resp.body = utils.errors.get_error_response(
                 falcon.HTTP_400, 'Something went wrong', str(ex)
             )
             return
@@ -33,11 +34,9 @@ class UserController(object):
                 retrieved_user = db.Session.query(User).filter_by(username=username).one()
             except NoResultFound:
                 resp.status = falcon.HTTP_404
-                resp.body = UserController._get_error_response(
-                                            falcon.HTTP_404,
-                                            'User could not be found',
-                                            'User does not exist or used to be.'
-                                            )
+                resp.body = utils.errors.get_error_response(
+                    falcon.HTTP_404, 'User could not be found', 'User does not exist or used to be.'
+                )
                 return
 
             resp.status = falcon.HTTP_201
@@ -54,7 +53,7 @@ class UserController(object):
             })
         except ValueError:
             resp.status = falcon.HTTP_400
-            resp.body = UserController._get_error_response(
+            resp.body = utils.errors.get_error_response(
                 falcon.HTTP_400, 'Malformed JSON', 'Could not decode the request body.'
             )
             return
@@ -64,7 +63,7 @@ class UserController(object):
             user_info_request = (req.stream.read()).decode('utf-8')
         except Exception as ex:
             resp.status = falcon.HTTP_400
-            resp.body = UserController._get_error_response(
+            resp.body = utils.errors.get_error_response(
                 falcon.HTTP_400, 'Something went wrong', str(ex)
             )
             return
@@ -99,22 +98,30 @@ class UserController(object):
                     requesting_user = decoded_token['sub']
 
                     try:
-                        retrieved_user = db.Session.query(User).filter_by(username=username).one()
+                        retrieved_user = db.Session.query(User).filter_by(username=requesting_user).one()
                     except NoResultFound:
                         # Who knows? The access token could still be valid but the user no longer
                         # exists.
                         resp.status = falcon.HTTP_404
-                        resp.body = UserController._get_error_response(
-                            falcon.HTTP_404,
-                            'User could not be found',
-                            'User does not exist or used to be.'
+                        resp.body = utils.errors.get_error_response(
+                            falcon.HTTP_404, 'User could not be found', 'Current user does not exist or used to be.'
                         )
                         return
+
+                    try:
+                        db.Session.query(User).filter_by(username=username).one()
+                        resp.status = falcon.HTTP_404
+                        resp.body = utils.errors.get_error_response(
+                            falcon.HTTP_404, 'User could not be found', 'User does not exist or used to be.'
+                        )
+                        return
+                    except NoResultFound:
+                        pass
 
                     if retrieved_user.user_type != 'admin':
                         resp.status = falcon.HTTP_403
                         resp.body = json.dumps(
-                            UserController._get_error_response(
+                            utils.errors.get_error_response(
                                 403, 'Forbidden', 'Request is forbidden.'
                             )
                         )
@@ -129,30 +136,18 @@ class UserController(object):
                     resp.body = json.dumps({'message': "success"})
                 except ExpiredSignatureError as ex:
                     resp.status = falcon.HTTP_400
-                    resp.body = UserController._get_error_response(
+                    resp.body = utils.errors.get_error_response(
                         falcon.HTTP_400, 'Access token error', 'Invalid or expired access token.'
                     )
                     return
             else:
                 resp.status = falcon.HTTP_403
                 resp.body = json.dumps(
-                    UserController._get_error_response(403, 'Forbidden', 'Request is forbidden.')
+                    utils.errors.get_error_response(403, 'Forbidden', 'Request is forbidden.')
                 )
         except ValueError:
             resp.status = falcon.HTTP_400
-            resp.body = UserController._get_error_response(
+            resp.body = utils.errors.get_error_response(
                 falcon.HTTP_400, 'Malformed JSON', 'Could not decode the request body.'
             )
             return
-
-    @staticmethod
-    def _get_error_response(error_code, error_type, error_message):
-        return {
-            'status':
-            {
-                'error': True,
-                'code': error_code,
-                'type': error_type,
-                'message': error_message
-            }
-        }
