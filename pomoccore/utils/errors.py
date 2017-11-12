@@ -1,10 +1,12 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
-import falcon
+
 import falcon.status_codes as http_status
 
 from falcon.http_error import HTTPError
+
+from pomoccore.utils import response
 
 
 class APIError(HTTPError):
@@ -22,12 +24,9 @@ class APIError(HTTPError):
         super(APIError, self).to_dict(obj_type)
 
         obj = obj_type()
-        obj['status'] = {
-            'error': True,
-            'code': self.status,
-            'title': self.title,
-            'description': self.description
-        }
+        obj['status'] = response.create_response_status_field(
+            True, self.status, self.code, self.title, self.description
+        )
 
         return obj
 
@@ -41,7 +40,7 @@ class APIBadRequestError(APIError):
             title=title,
             description=description,
             headers=None,
-            code=falcon.HTTP_BAD_REQUEST
+            code='Ignacio, you buffoon! Add a damn internal status code.'
         )
 
 
@@ -57,7 +56,7 @@ class APIUnauthorizedError(APIError):
             title=title,
             description=description,
             headers=headers,
-            code=falcon.HTTP_UNAUTHORIZED
+            code='Ignacio, you buffoon! Add a damn internal status code.'
         )
 
 
@@ -70,7 +69,7 @@ class APIForbiddenError(APIError):
             title=title,
             description=description,
             headers=None,
-            code=falcon.HTTP_FORBIDDEN
+            code='Ignacio, you buffoon! Add a damn internal status code.'
         )
 
 
@@ -83,7 +82,7 @@ class APINotFoundError(APIError):
             title=title,
             description=description,
             headers=None,
-            code=falcon.HTTP_NOT_FOUND
+            code='Ignacio, you buffoon! Add a damn internal status code.'
         )
 
 
@@ -96,5 +95,5 @@ class APIConflictError(APIError):
             title=title,
             description=description,
             headers=None,
-            code=falcon.HTTP_CONFLICT
+            code='Ignacio, you buffoon! Add a damn internal status code.'
         )

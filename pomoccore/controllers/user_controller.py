@@ -1,13 +1,12 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
-import json
-
 import falcon
 
 from pomoccore import db
 from pomoccore.models import User
 from pomoccore.utils import validators
+from pomoccore.utils import response
 
 
 class UserController(object):
@@ -15,23 +14,29 @@ class UserController(object):
     def on_get(self, req, resp):
         retrieved_user = db.Session.query(User).filter_by(username=req.get_json('username')).one()
 
-        resp.status = falcon.HTTP_201
-        resp.body = json.dumps({
-            'user_id': retrieved_user.user_id,
-            'user_type': retrieved_user.user_type,
-            'username': retrieved_user.username,
-            'first_name': retrieved_user.first_name,
-            'middle_name': retrieved_user.middle_name,
-            'last_name': retrieved_user.last_name,
-            'age': retrieved_user.age,
-            'birth_date': retrieved_user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f'),
-            'profile_picture': retrieved_user.profile_picture
-        })
+        data = {
+            'user': {
+                'user_id': retrieved_user.user_id,
+                'user_type': retrieved_user.user_type,
+                'username': retrieved_user.username,
+                'first_name': retrieved_user.first_name,
+                'middle_name': retrieved_user.middle_name,
+                'last_name': retrieved_user.last_name,
+                'age': retrieved_user.age,
+                'birth_date': retrieved_user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f'),
+                'profile_picture': retrieved_user.profile_picture
+            }
+        }
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
+            'Successful user data retrieval', 'User data successfully gathered.', data
+        )
 
     @falcon.before(validators.validate_access_token)
     @falcon.before(validators.access_token_requesting_user_exists)
     @falcon.before(validators.admin_required)
-    @falcon.before(validators.new_user_exists)
+    @falcon.before(validators.user_already_exists)
     def on_post(self, req, resp):
         user_id = req.get_json('user_id')
         user_type = req.get_json('user_type')
@@ -51,5 +56,7 @@ class UserController(object):
         )
         db.Session.commit()
 
-        resp.status = falcon.HTTP_201
-        resp.body = json.dumps({'message': "success"})  # TODO: FIX THIS SHITTY LOOKING SUCCESS RESPONSE.
+        response.set_successful_response(
+            resp, falcon.HTTP_201, 'Ignacio! Where is the damn internal code again?',
+            'User created successfully', 'New user {0} has been created.'.format(username)
+        )
