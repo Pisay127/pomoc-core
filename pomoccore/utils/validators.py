@@ -1,10 +1,12 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.
 # See the file 'LICENSE' for the full license governing this code.
 
+import jwt
 
 from jwt import ExpiredSignatureError
 from sqlalchemy.orm.exc import NoResultFound
 
+from pomoccore import db
 from pomoccore import settings
 from pomoccore.models import User
 from pomoccore.utils.errors import APIBadRequestError

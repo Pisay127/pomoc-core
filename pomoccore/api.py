@@ -11,7 +11,7 @@ db.init_db()
 
 api = API(middleware=[
     db_session_manager.DBSessionManager(db.Session),
-    jsonify.APIJsonify
+    jsonify.APIJsonify()
 ])
 
 api.set_error_serializer(error_serializer.http_json_error_serializer)

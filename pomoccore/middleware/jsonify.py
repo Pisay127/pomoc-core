@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for the full license governing this code.
 
 
-import falcon_jsonify
+from pomoccore.modules import falcon_jsonify
 
 from pomoccore.utils.errors import APIBadRequestError
 

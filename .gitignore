@@ -1,6 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 *$py.class
 
 # C extensions
@@ -15,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+pomoccore/modules/
 lib64/
 parts/
 sdist/
@@ -149,3 +148,6 @@ crashlytics-build.properties
 fabric.properties
 
 activate_venv.sh
+
+!pomoccore/modules/*
+!pomoccore/modules

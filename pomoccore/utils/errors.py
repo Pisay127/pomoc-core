@@ -25,7 +25,7 @@ class APIError(HTTPError):
         obj['status'] = {
             'error': True,
             'code': self.status,
-            'title': self.title
+            'title': self.title,
             'description': self.description
         }
 
@@ -85,6 +85,7 @@ class APINotFoundError(APIError):
             headers=None,
             code=falcon.HTTP_NOT_FOUND
         )
+
 
 class APIConflictError(APIError):
     def __init__(self,
