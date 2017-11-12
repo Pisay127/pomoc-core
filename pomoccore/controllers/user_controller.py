@@ -43,13 +43,11 @@ class UserController(object):
         age = req.get_json('age')
         birth_date = req.get_json('birth_date')
 
-        profile_picture = None
-        if 'profile_picture' in req.json:
-            profile_picture = req.get_json('profile_picture')
+        # TODO: Add profile picture upload support.
 
         db.Session.add(
             User(user_id, user_type, username, password, first_name,
-                 middle_name, last_name, age, birth_date, profile_picture)
+                 middle_name, last_name, age, birth_date)
         )
         db.Session.commit()
 
