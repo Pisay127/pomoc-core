@@ -17,44 +17,30 @@ from pomoccore import settings
 from pomoccore.models import User
 from pomoccore.models import FirstPartyApp
 from pomoccore.models import ClientApp
+from pomoccore.utils import validators
+from pomoccore.utils.errors import APIUnauthorizedError
 
 
 class OAuthController(object):
     def on_post(self, req, resp):
-        try:
-            oauth_request = (req.stream.read()).decode('utf-8')
-        except Exception as ex:
-            raise falcon.HTTPError(falcon.HTTP_400, 'Something went wrong', str(ex))
+        grant_type = req.get_json('grant_type')
+        client_id = req.get_json('client_id')
+        client_secret = req.get_json('client_secret')
 
         try:
-            request_json = json.loads(oauth_request, encoding='utf-8')
-            grant_type = request_json['grant_type']
-            client_id = request_json['client_id']
-            client_secret = request_json['client_secret']
+            queried_client = db.Session.query(ClientApp).filter(ClientApp.app_id == client_id).one()
+            client_authenticated = (queried_client.app_secret == client_secret)
+        except NoResultFound:
+            raise APIUnauthorizedError('Unauthorized', 'Client ID does not exist or the secret is incorrect')
 
-            try:
-                queried_client = db.Session.query(ClientApp).filter(ClientApp.app_id == client_id).one()
-                client_authenticated = (queried_client.app_secret == client_secret)
-            except NoResultFound:
-                client_authenticated = False
-
-            if client_authenticated:
-                if grant_type == 'password':
-                    username = request_json['username']
-                    password = request_json['password']
-                    resp = OAuthController._perform_password_grant(resp, client_id, username, password)
-                elif grant_type == 'client_credentials':
-                    # No scope for now.
-                    resp = OAuthController._perform_client_credentials_grant(resp, client_id)
-            else:
-                resp.status = falcon.HTTP_401
-                resp.body = json.dumps(
-                    OAuthController._get_error_response(
-                        401,'Unauthorized', 'Client ID does not exist or the secret is incorrect.'
-                    )
-                )
-        except ValueError:
-            raise falcon.HTTPError(falcon.HTTP_400, 'Malformed JSON', 'Could not decode the request body.')
+        if client_authenticated:
+            if grant_type == 'password':
+                username = req.get_json('username')
+                password = req.get_json('password')
+                resp = OAuthController._perform_password_grant(resp, client_id, username, password)
+            elif grant_type == 'client_credentials':
+                # No scope for now.
+                resp = OAuthController._perform_client_credentials_grant(resp, client_id)
 
     #@staticmethod
     #def _perform_refresh_token_grant():
@@ -86,8 +72,23 @@ class OAuthController(object):
         ).scalar()
 
         if client_is_first_party:
-            current_user = db.Session.query(User).filter_by(username=username, password=password).one()
-            if current_user is None:
+            try:
+                current_user = db.Session.query(User).filter_by(username=username).one()
+                if current_user.password == password:
+                    access_token = OAuthController._generate_access_token(username).decode('utf-8')
+                    refresh_token = OAuthController._generate_refresh_token(settings.TOKEN_SECRET_LENGTH)
+
+                    # Store refresh token to DB
+
+                    resp.status = falcon.HTTP_200
+                    resp.body = json.dumps({
+                        'token_type': "bearer",
+                        'access_token': access_token,
+                        'refresh_token': refresh_token
+                    })
+
+                    return resp
+            except NoResultFound:
                 resp.status = falcon.HTTP_401
                 resp.body = json.dumps(
                     OAuthController._get_error_response(
@@ -96,20 +97,17 @@ class OAuthController(object):
                         'Authentication failure. Incorrect username/password combination.'
                     )
                 )
-            else:
-                access_token = OAuthController._generate_access_token(username).decode('utf-8')
-                refresh_token = OAuthController._generate_refresh_token(
-                    settings.TOKEN_SECRET_LENGTH
-                ).decode('utf-8')
 
-                # Store refresh token to DB
+                return resp
 
-                resp.status = falcon.HTTP_200
-                resp.body = json.dumps({
-                    'token_type': "bearer",
-                    'access_token': access_token,
-                    'refresh_token': refresh_token
-                })
+            resp.status = falcon.HTTP_401
+            resp.body = json.dumps(
+                OAuthController._get_error_response(
+                    401,
+                    'Unauthorized',
+                    'Authentication failure. Incorrect username/password combination.'
+                )
+            )
         else:
             resp.status = falcon.HTTP_403
             resp.body = json.dumps(
