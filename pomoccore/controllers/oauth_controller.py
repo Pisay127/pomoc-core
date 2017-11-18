@@ -17,7 +17,6 @@ from pomoccore import settings
 from pomoccore.models import User
 from pomoccore.models import FirstPartyApp
 from pomoccore.models import ClientApp
-from pomoccore.utils import validators
 from pomoccore.utils.errors import APIUnauthorizedError
 
 
