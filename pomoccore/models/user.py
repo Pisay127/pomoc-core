@@ -1,12 +1,13 @@
 # Copyright (c) 2017 Pisay127. All rights reserved.g br
 # See the file 'LICENSE' for the full license governing this code.
 
+from datetime import datetime
+
 from sqlalchemy import Column
 from sqlalchemy import Text
 from sqlalchemy import SmallInteger
 from sqlalchemy import BigInteger
 from sqlalchemy import DateTime
-from sqlalchemy.schema import ForeignKey
 from sqlalchemy_utils.types import PasswordType
 
 from pomoccore import settings
@@ -40,27 +41,11 @@ class User(BaseModel):
         self.first_name = first_name.strip()
         self.middle_name = middle_name.strip()
         self.last_name = last_name.strip()
-        self.age = age.strip()
-        self.birth_date = birth_date  # Note to convert `birth_date` to something matches its type (DateTime)
+        self.age = age
+        self.birth_date = datetime.strptime(birth_date, '%Y-%m-%d %H:%M:%S.%f')
 
         if profile_picture:
             self.profile_picture = profile_picture
 
     def __repr__(self):
         return '<User {0}>'.format(self.id_number)
-
-
-class UserAccessTokens(BaseModel):
-
-    __tablename__ = 'user_access_tokens'
-
-    user_id = Column('user_id', BigInteger,
-                     ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
-                     primary_key=True, nullable=False, unique=True)
-    access_token = Column('access_token', BigInteger, nullable=False, unique=True)
-
-    # Delete records after an hour.
-
-    def __init__(self, user_id, access_token):
-        self.user_id = user_id
-        self.access_token = access_token

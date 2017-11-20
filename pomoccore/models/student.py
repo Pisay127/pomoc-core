@@ -24,15 +24,12 @@ class Student(BaseModel):
                         ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False, unique=True)
     year_level = Column('year_level', SmallInteger, nullable=False)
-
     sections = relationship('StudentSection', backref='student_account')
     ratings = relationship('StudentRating', backref='student_account')
     batch = relationship('StudentBatch', backref='student_account', uselist=False)
     monthly_attendance = relationship('StudentMonthlyAttendance', backref='student_account')
     statuses = relationship('StudentStatus', backref='student_account')
     subjects = relationship('StudentSubject', backref='student_account')
-    subject_grades = relationship('StudentSubjectGrade', backref='student_account')
-    pending_subject_grades = relationship('StudentSubjectPendingGrade', backref='student_account')
 
     def __init__(self, student_id, year_level):
         self.student_id = student_id
@@ -277,7 +274,9 @@ class StudentSubjectPendingGrade(BaseModel):
 
     student_id = Column('student_id', BigInteger, primary_key=True, nullable=False)
     subject_id = Column('subject_id', BigInteger, primary_key=True, nullable=False)
-    requesting_teacher_id = Column('requesting_teacher_id', BigInteger, nullable=False)
+    requesting_teacher_id = Column('requesting_teacher_id', BigInteger,
+                                   ForeignKey('teacher_account.id', onupdate='cascade', ondelete='cascade'),
+                                   nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
     quarter = Column('quarter', SmallInteger, primary_key=True, nullable=False)
     proposed_grade = Column('proposed_grade', DECIMAL, nullable=False)

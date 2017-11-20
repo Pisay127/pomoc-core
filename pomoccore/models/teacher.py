@@ -17,7 +17,6 @@ class Teacher(BaseModel):
     teacher_id = Column('id', BigInteger,
                         ForeignKey('user.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=True, unique=True)
-
     pending_subject_grades = relationship('StudentSubjectPendingGrade', backref='teacher_account')
     section_advisories = relationship('SectionAdvisor', backref='teacher_account')
     batch_advisories = relationship('BatchAdvisor', backref='teacher_account')

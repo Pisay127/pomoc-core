@@ -3,7 +3,6 @@
 
 from .base_model import BaseModel
 from .user import User
-from .user import UserAccessTokens
 from .student import Student
 from .student import StudentSection
 from .student import StudentRating
@@ -26,11 +25,12 @@ from .subject import Subject
 from .subject import SubjectOffering
 from .misc import VariableSettings
 from .admin import Admin
+from .oauth import ClientApp
+from .oauth import FirstPartyApp
 
 __all__ = [
     'BaseModel',
     'User',
-    'UserAccessTokens',
     'Student',
     'StudentSection',
     'StudentRating',
@@ -52,5 +52,6 @@ __all__ = [
     'Subject',
     'SubjectOffering',
     'VariableSettings',
-    'Admin'
+    'Admin',
+    'ClientApp',
 ]
