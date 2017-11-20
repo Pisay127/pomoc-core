@@ -74,7 +74,7 @@ class OAuthController(object):
             try:
                 current_user = db.Session.query(User).filter_by(username=username).one()
                 if current_user.password == password:
-                    access_token = OAuthController._generate_access_token(username).decode('utf-8')
+                    access_token = OAuthController._generate_access_token(current_user.user_id).decode('utf-8')
                     refresh_token = OAuthController._generate_refresh_token(settings.TOKEN_SECRET_LENGTH)
 
                     # Store refresh token to DB
