@@ -17,7 +17,7 @@ from pomoccore.utils.errors import APIConflictError
 
 def user_exists(req, resp, resource, params):
     try:
-        db.Session.query(User).filter_by(username=req.get_json('username')).one()
+        db.Session.query(User).filter_by(username=req.get_json('user_id')).one()
     except NoResultFound:
         raise APINotFoundError('User could not be found', 'User does not exist, or used to be.')
 
@@ -39,16 +39,18 @@ def access_token_requesting_user_exists(req, resp, resource, params):
         req.get_json('access_token'), settings.SERVER_SECRET, algorithms='HS256', audience='/', issuer='/'
     )
 
-    username=decoded_token['sub']
+    user_id = decoded_token['sub']
 
     try:
-        db.Session.query(User).filter_by(username=username).one()
+        db.Session.query(User).filter_by(user_id=user_id).one()
     except NoResultFound:
         raise APINotFoundError('Requesting user non-existent', 'User owning this access token does not exist.')
 
 
 def user_already_exists(req, resp, resource, params):
     try:
+        # We should really just check with a username here cause we don't have a user id
+        # at this point.
         db.Session.query(User).filter_by(username=req.get_json('username')).one()
         raise APIConflictError('User already exists', 'User with the same username already exists.')
     except NoResultFound:
@@ -60,8 +62,8 @@ def admin_required(req, resp, resource, params):
         req.get_json('access_token'), settings.SERVER_SECRET, algorithms='HS256', audience='/', issuer='/'
     )
 
-    username = decoded_token['sub']
-    retrieved_user = db.Session.query(User).filter_by(username=username).one()
+    user_id = decoded_token['sub']
+    retrieved_user = db.Session.query(User).filter_by(user_id=user_id).one()
 
     if retrieved_user.user_type != 'admin':
         raise APIForbiddenError('Forbidden access', 'User must be an admin.')

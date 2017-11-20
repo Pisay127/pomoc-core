@@ -12,7 +12,7 @@ from pomoccore.utils import response
 class UserController(object):
     @falcon.before(validators.user_exists)
     def on_get(self, req, resp):
-        retrieved_user = db.Session.query(User).filter_by(username=req.get_json('username')).one()
+        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
 
         data = {
             'user': {
