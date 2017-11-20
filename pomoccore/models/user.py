@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Pisay127. All rights reserved.
+# Copyright (c) 2017 Pisay127. All rights reserved.g br
 # See the file 'LICENSE' for the full license governing this code.
 
 from sqlalchemy import Column
