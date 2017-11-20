@@ -1,3 +1,3 @@
 [submodule "pomoccore/modules/falcon-jsonify"]
 	path = pomoccore/modules/falcon-jsonify
-	url = https://github.com/Pisay127/falcon-jsonify.git
+	url = git@github.com:Pisay127/falcon-jsonify.git
