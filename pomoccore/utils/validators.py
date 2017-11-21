@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from pomoccore import db
 from pomoccore import settings
 from pomoccore.models import User
+from pomoccore.models import Subject
 from pomoccore.utils.errors import APIBadRequestError
 from pomoccore.utils.errors import APINotFoundError
 from pomoccore.utils.errors import APIForbiddenError
