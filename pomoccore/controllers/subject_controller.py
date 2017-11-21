@@ -77,5 +77,14 @@ class SubjectController(object):
             'Subject updated successfully', 'Subject {0} has been updated.'.format(retrieved_subject.subject_name)
         )
 
+    @falcon.before(validators.subject_exists)
     def on_delete(self, req, resp):
-        pass
+        retrieved_subject = db.Session.query(Subject).filter_by(subject_id=req.get_json('id')).one()
+
+        db.Session.delete(retrieved_subject)
+        db.Session.commit()
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
+            'Subject updated successfully', 'Subject {0} has been updated.'.format(retrieved_subject.subject_name)
+        )
