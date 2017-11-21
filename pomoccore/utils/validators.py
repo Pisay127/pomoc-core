@@ -17,7 +17,7 @@ from pomoccore.utils.errors import APIConflictError
 
 def user_exists(req, resp, resource, params):
     try:
-        db.Session.query(User).filter_by(username=req.get_json('user_id')).one()
+        db.Session.query(User).filter_by(user_id=int(req.get_json('id'))).one()
     except NoResultFound:
         raise APINotFoundError('User could not be found', 'User does not exist, or used to be.')
 
@@ -39,7 +39,7 @@ def access_token_requesting_user_exists(req, resp, resource, params):
         req.get_json('access_token'), settings.SERVER_SECRET, algorithms='HS256', audience='/', issuer='/'
     )
 
-    user_id = decoded_token['sub']
+    user_id = int(decoded_token['sub'])
 
     try:
         db.Session.query(User).filter_by(user_id=user_id).one()
@@ -62,7 +62,7 @@ def admin_required(req, resp, resource, params):
         req.get_json('access_token'), settings.SERVER_SECRET, algorithms='HS256', audience='/', issuer='/'
     )
 
-    user_id = decoded_token['sub']
+    user_id = int(decoded_token['sub'])
     retrieved_user = db.Session.query(User).filter_by(user_id=user_id).one()
 
     if retrieved_user.user_type != 'admin':

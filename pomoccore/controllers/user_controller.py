@@ -12,11 +12,11 @@ from pomoccore.utils import response
 class UserController(object):
     @falcon.before(validators.user_exists)
     def on_get(self, req, resp):
-        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
+        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
 
         data = {
             'user': {
-                'user_id': retrieved_user.user_id,
+                'id': retrieved_user.id_number,
                 'user_type': retrieved_user.user_type,
                 'username': retrieved_user.username,
                 'first_name': retrieved_user.first_name,
@@ -38,7 +38,7 @@ class UserController(object):
     @falcon.before(validators.admin_required)
     @falcon.before(validators.user_already_exists)
     def on_post(self, req, resp):
-        user_id = req.get_json('user_id')
+        id_number = req.get_json('id_number')
         user_type = req.get_json('user_type')
         username = req.get_json('username')
         password = req.get_json('password')
@@ -51,7 +51,7 @@ class UserController(object):
         # TODO: Add profile picture upload support.
 
         db.Session.add(
-            User(user_id, user_type, username, password, first_name,
+            User(id_number, user_type, username, password, first_name,
                  middle_name, last_name, age, birth_date)
         )
         db.Session.commit()
