@@ -110,7 +110,8 @@ class OAuthController(object):
         else:
             resp.status = falcon.HTTP_403
             resp.body = json.dumps(
-                OAuthController._get_error_response(403, 'Forbidden', 'Client must be a first party app.')
+                OAuthController._g▼
+Logoutet_error_response(403, 'Forbidden', 'Client must be a first party app.')
             )
 
         return resp
