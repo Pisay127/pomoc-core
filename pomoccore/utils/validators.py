@@ -68,6 +68,16 @@ def admin_required(req, resp, resource, params):
         raise APIForbiddenError('Forbidden access', 'User must be an admin.')
 
 
+def subject_exists(req, resp, resource, params):
+    if req.get_json('id') == '__all__':  # Denotes that we need all the subjects.
+        return
+
+    try:
+        db.Session.query(Subject).filter_by(subject_id=int(req.get_json('id'))).one()
+    except NoResultFound:
+        raise APINotFoundError('Subject could not be found', 'Subject does not exist, or used to be.')
+
+
 def subject_not_exists(req, resp, resource, params):
     try:
         db.Session.query(Subject).filter_by(subject_name=req.get_json('name')).one()
