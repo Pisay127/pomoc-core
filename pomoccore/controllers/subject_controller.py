@@ -60,8 +60,22 @@ class SubjectController(object):
             'Subject created successfully', 'New subject {0} has been created.'.format(name)
         )
 
+    @falcon.before(validators.subject_exists)
     def on_put(self, req, resp):
-        pass
+        retrieved_subject = db.Session.query(Subject).filter_by(subject_id=req.get_json('id')).one()
+
+        if 'name' in req.json:
+            retrieved_subject.subject_name = req.get_json('name')
+
+        if 'year_level' in req.json:
+            retrieved_subject.year_level = req.get_json('year_level')
+
+        db.Session.commit()
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
+            'Subject updated successfully', 'Subject {0} has been updated.'.format(retrieved_subject.subject_name)
+        )
 
     def on_delete(self, req, resp):
         pass
