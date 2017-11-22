@@ -86,5 +86,5 @@ class SectionController(object):
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
-            'Subject updated successfully', 'Subject {0} has been updated.'.format(retrieved_section.section_name)
+            'Section successfully', 'Section {0} has been deleted.'.format(retrieved_section.section_name)
         )

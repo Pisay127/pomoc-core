@@ -77,7 +77,6 @@ class StudentStatusController(object):
                                                                    year_level=req.get_json('year_level'),
                                                                    school_year=req.get_json('school_year')
                                                                    ).one()
-
         db.Session.delete(student_status)
         db.Session.commit()
 
