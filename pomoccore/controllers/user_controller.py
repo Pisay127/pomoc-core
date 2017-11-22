@@ -62,7 +62,7 @@ class UserController(object):
         elif user_type == 'teacher':
             db.Session.add(Teacher(new_user.user_id))
         else:  # Oh, it's a student then.
-            db.Session.add(Student(new_user.user_id))
+            db.Session.add(Student(new_user.user_id, 1))  # Assume that it is a 7th grader.
 
         db.Session.commit()
 
