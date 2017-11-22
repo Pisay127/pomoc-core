@@ -30,6 +30,7 @@ class Student(BaseModel):
     monthly_attendance = relationship('StudentMonthlyAttendance', backref='student_account')
     statuses = relationship('StudentStatus', backref='student_account')
     subjects = relationship('StudentSubject', backref='student_account')
+    gwa = relationship('StudentGWA', backref='student_account')
 
     def __init__(self, student_id, year_level):
         self.student_id = student_id
@@ -37,6 +38,27 @@ class Student(BaseModel):
 
     def __repr__(self):
         return '<Student {0}>'.format(self.student_id)
+
+
+class StudentGWA(BaseModel):
+
+    __tablename__ = 'student_gwa'
+
+    student_id = Column('student_id', BigInteger,
+                        ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
+                        primary_key=True, nullable=False)
+    gwa = Column('gwa', DECIMAL, nullable=False)
+    quarter = Column('quarter', SmallInteger, primary_key=True, nullable=False)
+    school_year = Column('school_year', Text, primary_key=True, nullable=True)
+
+    def __init__(self, student_id, gwa, quarter, school_year):
+        self.student_id = student_id
+        self.gwa = gwa
+        self.quarter = quarter
+        self.school_year = school_year
+
+    def __repr__(self):
+        return '<StudentGWA {0}>'.format(self.student_id)
 
 
 class StudentSection(BaseModel):
