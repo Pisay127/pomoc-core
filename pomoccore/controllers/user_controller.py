@@ -119,5 +119,5 @@ class UserController(object):
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
-            'User deleted successfully', 'User {0} has been deleted.'.format(retrieved_user.subject_name)
+            'User deleted successfully', 'User {0} has been deleted.'.format(retrieved_user.username)
         )

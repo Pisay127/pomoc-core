@@ -189,7 +189,7 @@ class StudentStatus(BaseModel):
     student_id = Column('student_id', BigInteger,
                         ForeignKey('student_account.id', onupdate='cascade', ondelete='cascade'),
                         primary_key=True, nullable=False)
-    status = Column('status', Text, primary_key=True, nullable=False)
+    status = Column('status', Text, nullable=False)
     quarter = Column('quarter', SmallInteger, primary_key=True, nullable=False)
     year_level = Column('year_level', SmallInteger, primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=False)
