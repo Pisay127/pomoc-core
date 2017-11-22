@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from pomoccore import db
 from pomoccore import settings
 from pomoccore.models import User
+from pomoccore.models import Subject
 from pomoccore.utils.errors import APIBadRequestError
 from pomoccore.utils.errors import APINotFoundError
 from pomoccore.utils.errors import APIForbiddenError
@@ -49,9 +50,7 @@ def access_token_requesting_user_exists(req, resp, resource, params):
 
 def user_already_exists(req, resp, resource, params):
     try:
-        # We should really just check with a username here cause we don't have a user id
-        # at this point.
-        db.Session.query(User).filter_by(username=req.get_json('username')).one()
+        db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
         raise APIConflictError('User already exists', 'User with the same username already exists.')
     except NoResultFound:
         pass
@@ -67,3 +66,21 @@ def admin_required(req, resp, resource, params):
 
     if retrieved_user.user_type != 'admin':
         raise APIForbiddenError('Forbidden access', 'User must be an admin.')
+
+
+def subject_exists(req, resp, resource, params):
+    if req.get_json('id') == '__all__':  # Denotes that we need all the subjects.
+        return
+
+    try:
+        db.Session.query(Subject).filter_by(subject_id=int(req.get_json('id'))).one()
+    except NoResultFound:
+        raise APINotFoundError('Subject could not be found', 'Subject does not exist, or used to be.')
+
+
+def subject_not_exists(req, resp, resource, params):
+    try:
+        db.Session.query(Subject).filter_by(subject_name=req.get_json('name')).one()
+        raise APIConflictError('Subject already exists', 'Subject with the same name already exists.')
+    except NoResultFound:
+        pass
