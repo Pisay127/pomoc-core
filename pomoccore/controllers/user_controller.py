@@ -5,6 +5,9 @@ import falcon
 
 from pomoccore import db
 from pomoccore.models import User
+from pomoccore.models import Admin
+from pomoccore.models import Teacher
+from pomoccore.models import Student
 from pomoccore.utils import validators
 from pomoccore.utils import response
 
@@ -50,10 +53,17 @@ class UserController(object):
 
         # TODO: Add profile picture upload support.
 
-        db.Session.add(
-            User(id_number, user_type, username, password, first_name,
-                 middle_name, last_name, age, birth_date)
-        )
+        new_user = User(id_number, user_type, username, password, first_name,
+                        middle_name, last_name, age, birth_date)
+        db.Session.add(new_user)
+
+        if user_type == 'admin':
+            db.Session.add(Admin(new_user.user_id))
+        elif user_type == 'teacher':
+            db.Session.add(Teacher(new_user.user_id))
+        else:  # Oh, it's a student then.
+            db.Session.add(Student(new_user.user_id))
+
         db.Session.commit()
 
         response.set_successful_response(
@@ -68,8 +78,7 @@ class UserController(object):
         if 'id_number' in req.json:
             retrieved_user.id_number = req.get_json('id_number')
 
-        if 'user_type' in req.json:
-            retrieved_user.user_type = req.get_json('user_type').strip().lower()
+        # We should not modify the user type. Records will get fucked up.
 
         if 'username' in req.json:
             retrieved_user.username = req.get_json('username').strip().lower()
