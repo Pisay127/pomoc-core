@@ -10,6 +10,7 @@ from pomoccore import db
 from pomoccore import settings
 from pomoccore.models import User
 from pomoccore.models import Teacher
+from pomoccore.models import Student
 from pomoccore.models import Subject
 from pomoccore.models.grouping import Section
 from pomoccore.models.teacher import TeacherPosition
@@ -106,6 +107,16 @@ def section_not_exists(req, resp, resource, params):
         raise APIConflictError('Section already exists', 'Section with the same name already exists.')
     except NoResultFound:
         pass
+
+
+def student_exists(req, resp, resource, params):
+    if req.get_json('id') == '__all__':
+        return
+
+    try:
+        db.Session.query(Student).filter_by(student_id=int(req.get_json('id'))).one()
+    except NoResultFound:
+        raise APINotFoundError('Student could not be found', 'Student does not exist, or used to be.')
 
 
 def teacher_exists(req, resp, resource, params):
