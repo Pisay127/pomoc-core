@@ -40,7 +40,7 @@ class SubjectOffering(BaseModel):
     instructor_id = Column('instructor_id', BigInteger,
                            ForeignKey('teacher_account.id'),
                            primary_key=True, nullable=False)
-    schedule = Column('schedule', Text, nullable=False)
+    schedule = Column('schedule', Text, primary_key=True, nullable=False)
 
     students = relationship('StudentSubject', backref='subject_offering')
 

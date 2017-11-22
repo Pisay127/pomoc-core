@@ -4,10 +4,133 @@
 import falcon
 
 from pomoccore import db
+from pomoccore.models import Teacher
 from pomoccore.models import TeacherPosition
 from pomoccore.models import TeacherPositionList
 from pomoccore.utils import validators
 from pomoccore.utils import response
+
+
+class TeacherController(object):
+    @falcon.before(validators.teacher_exists)
+    def on_get(self, req, resp):
+        data = dict()
+        data['teacher'] = dict()
+        if req.get_json('id') == '__all__':
+            teachers = Teacher.query.all()
+
+            row_ctr = 0
+            for teacher in teachers:
+                subject_grade_ctr = 0
+                pending_subject_grades = dict()
+                for subject_grade in teacher.pending_subject_grades:
+                    pending_subject_grades[subject_grade_ctr] = {
+                        'student_id': subject_grade.student_id,
+                        'subject_id': subject_grade.subject_id,
+                        'school_year': subject_grade.school_year,
+                        'quarter': subject_grade.quarter
+                    }
+
+                    subject_grade_ctr += 1
+
+                section_adviser_ctr = 0
+                section_advisories = dict()
+                for section_advisory in teacher.section_advisories:
+                    section_advisories[section_adviser_ctr] = {
+                        'section_id': section_advisory.section_id,
+                        'school_year': section_advisory.school_year
+                    }
+
+                    section_adviser_ctr += 1
+
+                batch_adviser_ctr = 0
+                batch_advisories = dict()
+                for batch_advisory in teacher.batch_advisories:
+                    batch_advisories[batch_adviser_ctr] = {
+                        'batch_year': batch_advisory.batch_year,
+                        'school_year': batch_advisory.school_year
+                    }
+
+                    batch_adviser_ctr += 1
+
+                subject_ctr = 0
+                subjects = dict()
+                for subject in teacher.subjects:
+                    subjects[subject_ctr] = {
+                        'subject_id': subject.subject_id,
+                        'school_year': subject.school_year,
+                        'schedule': subject.schedule
+                    }
+
+                    subject_ctr += 1
+
+                data['teachers'][row_ctr] = {
+                    'id': teacher.teacher_id,
+                    'pending_subject_grades': pending_subject_grades,
+                    'section_advisories': section_advisories,
+                    'batch_advisories': batch_advisories,
+                    'subjects': subjects
+                }
+
+                row_ctr += 1
+        else:
+            teacher = db.Session.query(Teacher).filter_by(teacher_id=req.get_json('id')).one()
+
+            subject_grade_ctr = 0
+            pending_subject_grades = dict()
+            for subject_grade in teacher.pending_subject_grades:
+                pending_subject_grades[subject_grade_ctr] = {
+                    'student_id': subject_grade.student_id,
+                    'subject_id': subject_grade.subject_id,
+                    'school_year': subject_grade.school_year,
+                    'quarter': subject_grade.quarter
+                }
+
+                subject_grade_ctr += 1
+
+            section_adviser_ctr = 0
+            section_advisories = dict()
+            for section_advisory in teacher.section_advisories:
+                section_advisories[section_adviser_ctr] = {
+                    'section_id': section_advisory.section_id,
+                    'school_year': section_advisory.school_year
+                }
+
+                section_adviser_ctr += 1
+
+            batch_adviser_ctr = 0
+            batch_advisories = dict()
+            for batch_advisory in teacher.batch_advisories:
+                batch_advisories[batch_adviser_ctr] = {
+                    'batch_year': batch_advisory.batch_year,
+                    'school_year': batch_advisory.school_year
+                }
+
+                batch_adviser_ctr += 1
+
+            subject_ctr = 0
+            subjects = dict()
+            for subject in teacher.subjects:
+                subjects[subject_ctr] = {
+                    'subject_id': subject.subject_id,
+                    'school_year': subject.school_year,
+                    'schedule': subject.schedule
+                }
+
+                subject_ctr += 1
+
+            data['teacher'] = {
+                'id': teacher.teacher_id,
+                'pending_subject_grades': pending_subject_grades,
+                'section_advisories': section_advisories,
+                'batch_advisories': batch_advisories,
+                'subjects': subjects
+            }
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
+            'Successful teacher data retrieval', 'Teacher data successfully gathered.', data
+        )
 
 
 class TeacherPositionController(object):
@@ -44,7 +167,7 @@ class TeacherPositionController(object):
         position_id = req.get_json('position_id')
         school_year = req.get_json('school_year')
 
-        db.Session.add(TeacherPosition(teacher_id, position_id. school_year))
+        db.Session.add(TeacherPosition(teacher_id, position_id, school_year))
         db.Session.commit()
 
         response.set_successful_response(
