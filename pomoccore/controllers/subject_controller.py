@@ -5,6 +5,7 @@ import falcon
 
 from pomoccore import db
 from pomoccore.models import Subject
+from pomoccore.models import SubjectOffering
 from pomoccore.utils import validators
 from pomoccore.utils import response
 
@@ -87,4 +88,84 @@ class SubjectController(object):
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
             'Subject updated successfully', 'Subject {0} has been updated.'.format(retrieved_subject.subject_name)
+        )
+
+
+class SubjectOfferingController(object):
+    @falcon.before(validators.subject_exists)
+    def on_get(self, req, resp):
+        subject = db.Session.query(Subject).filter_by(subject_id=req.get_json('id')).one()
+
+        offering_ctr = 0
+        data = dict()
+        data['subject_offering'] = dict()
+        for offering in subject.offerings:
+            data['subject_offering'][offering_ctr] = {
+                'subject_id': offering.subject_id,
+                'school_year': offering.school_year,
+                'instructor_id': offering.instructor_id,
+                'schedule': offering.schedule
+            }
+
+            offering_ctr += 1
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
+            'Successful subject offering retrieval', 'Subject offering successfully gathered.', data
+        )
+
+    @falcon.before(validators.validate_access_token)
+    @falcon.before(validators.access_token_requesting_user_exists)
+    @falcon.before(validators.admin_required)
+    @falcon.before(validators.subject_offering_not_exists)
+    def on_post(self, req, resp):
+        subject_id = req.get_json('id')
+        school_year = req.get_json('school_year')
+        instructor_id = req.get_json('instructor_id')
+        schedule = req.get_json('schedule')
+
+        db.Session.add(SubjectOffering(subject_id, school_year, instructor_id, schedule))
+        db.Session.commit()
+
+        response.set_successful_response(
+            resp, falcon.HTTP_201, 'Ignacio! Where is the damn internal code again?',
+            'Subject offering created successfully', 'New offering {0} has been created.'
+        )
+
+    @falcon.before(validators.subject_offering_exists)
+    def on_put(self, req, resp):
+        offering = db.Session.query(SubjectOffering).filter_by(subject_id=req.get_json('id'),
+                                                               school_year=req.get_json('school_year'),
+                                                               instructor_id=req.get_json('instructor_id'),
+                                                               schedule=req.get_json('schedule')).one()
+
+        if 'school_year' in req.json:
+            offering.school_year = req.get_json('school_year')
+
+        if 'instructor_id' in req.json:
+            offering.instructor_id = req.get_json('instructor_id')
+
+        if 'schedule' in req.json:
+            offering.schedule = req.get_json('schedule')
+
+        db.Session.commit()
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
+            'Offering updated successfully', 'Offering has been updated.'
+        )
+
+    @falcon.before(validators.subject_offering_exists)
+    def on_delete(self, req, resp):
+        offering = db.Session.query(SubjectOffering).filter_by(subject_id=req.get_json('id'),
+                                                               school_year=req.get_json('school_year'),
+                                                               instructor_id=req.get_json('instructor_id'),
+                                                               schedule=req.get_json('schedule')).one()
+
+        db.Session.delete(offering)
+        db.Session.commit()
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
+            'Offering deleted successfully', 'Offering has been deleted.'
         )

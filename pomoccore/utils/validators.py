@@ -11,6 +11,7 @@ from pomoccore import settings
 from pomoccore.models import User
 from pomoccore.models import Teacher
 from pomoccore.models import Subject
+from pomoccore.models import SubjectOffering
 from pomoccore.models.grouping import Section
 from pomoccore.models.teacher import TeacherPosition
 from pomoccore.models.teacher import TeacherPositionList
@@ -139,5 +140,26 @@ def teacher_position_not_exists(req, resp, resource, params):
     try:
         db.Session.query(TeacherPositionList).filter_by(position_id=int(req.get_json('id'))).one()
         raise APIConflictError('Teacher position already exists', 'Position with the same name already exists.')
+    except NoResultFound:
+        pass
+
+
+def subject_offering_exists(req, resp, resource, params):
+    try:
+        db.Session.query(SubjectOffering).filter_by(subject_id=req.get_json('id'),
+                                                    school_year=req.get_json('school_year'),
+                                                    instructor_id=req.get_json('instructor_id'),
+                                                    schedule=req.get_json('schedule')).one()
+    except NoResultFound:
+        raise APINotFoundError('Offering could not be found', 'Offering does not exist, or used to be.')
+
+
+def subject_offering_not_exists(req, resp, resource, params):
+    try:
+        db.Session.query(SubjectOffering).filter_by(subject_id=req.get_json('id'),
+                                                    school_year=req.get_json('school_year'),
+                                                    instructor_id=req.get_json('instructor_id'),
+                                                    schedule=req.get_json('schedule')).one()
+        raise APIConflictError('Subject offering already exists', 'Offering with the same details already exists.')
     except NoResultFound:
         pass
