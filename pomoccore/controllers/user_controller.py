@@ -36,7 +36,7 @@ class UserController(object):
     @falcon.before(validators.validate_access_token)
     @falcon.before(validators.access_token_requesting_user_exists)
     @falcon.before(validators.admin_required)
-    @falcon.before(validators.user_already_exists)
+    @falcon.before(validators.user_not_exists)
     def on_post(self, req, resp):
         id_number = req.get_json('id_number')
         user_type = req.get_json('user_type')
@@ -59,4 +59,56 @@ class UserController(object):
         response.set_successful_response(
             resp, falcon.HTTP_201, 'Ignacio! Where is the damn internal code again?',
             'User created successfully', 'New user {0} has been created.'.format(username)
+        )
+
+    @falcon.before(validators.user_exists)
+    def on_put(self, req, resp):
+        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
+
+        if 'id_number' in req.json:
+            retrieved_user.id_number = req.get_json('id_number')
+
+        if 'user_type' in req.json:
+            retrieved_user.user_type = req.get_json('user_type').strip().lower()
+
+        if 'username' in req.json:
+            retrieved_user.username = req.get_json('username').strip().lower()
+
+        if 'password' in req.json:
+            retrieved_user.password = req.get_json('password')
+
+        if 'first_name' in req.json:
+            retrieved_user.password = req.get_json('first_name').strip()
+
+        if 'middle_name' in req.json:
+            retrieved_user.middle_name = req.get_json('middle_name').strip()
+
+        if 'last_name' in req.json:
+            retrieved_user.last_name = req.get_json('last_name').strip()
+
+        if 'age' in req.json:
+            retrieved_user.age = req.get_json('age')
+
+        if 'birth_date' in req.json:
+            retrieved_user.birth_date = req.get_json('birth_date')
+
+        # NOTE: Handle profile pictures in the future.
+
+        db.Session.commit()
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
+            'User updated successfully', 'User {0} has been updated.'.format(retrieved_user.username)
+        )
+
+    @falcon.before(validators.user_exists)
+    def on_delete(self, req, resp):
+        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
+
+        db.Session.delete(retrieved_user)
+        db.Session.commit()
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
+            'User deleted successfully', 'User {0} has been deleted.'.format(retrieved_user.subject_name)
         )

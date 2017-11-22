@@ -49,7 +49,7 @@ def access_token_requesting_user_exists(req, resp, resource, params):
         raise APINotFoundError('Requesting user non-existent', 'User owning this access token does not exist.')
 
 
-def user_already_exists(req, resp, resource, params):
+def user_not_exists(req, resp, resource, params):
     try:
         db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
         raise APIConflictError('User already exists', 'User with the same username already exists.')
