@@ -11,6 +11,7 @@ from pomoccore import settings
 from pomoccore.models import User
 from pomoccore.models import Subject
 from pomoccore.models.grouping import Section
+from pomoccore.models.teacher import TeacherPositionList
 from pomoccore.utils.errors import APIBadRequestError
 from pomoccore.utils.errors import APINotFoundError
 from pomoccore.utils.errors import APIForbiddenError
@@ -101,5 +102,23 @@ def section_not_exists(req, resp, resource, params):
     try:
         db.Session.query(Section).filter_by(section_name=req.get_json('name')).one()
         raise APIConflictError('Section already exists', 'Section with the same name already exists.')
+    except NoResultFound:
+        pass
+
+
+def teacher_position_exists(req, resp, resource, params):
+    if req.get_json('id') == '__all__':  # Denotes that we need all the teacher positions
+        return
+
+    try:
+        db.Session.query(TeacherPositionList).filter_by(position_id=int(req.get_json('id'))).one()
+    except NoResultFound:
+        raise APINotFoundError('Teacher could not be found', 'Section does not exist, or used to be.')
+
+
+def teacher_position_not_exists(req, resp, resource, params):
+    try:
+        db.Session.query(TeacherPositionList).filter_by(position_id=int(req.get_json('id'))).one()
+        raise APIConflictError('Teacher position already exists', 'Position with the same name already exists.')
     except NoResultFound:
         pass
