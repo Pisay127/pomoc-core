@@ -5,6 +5,7 @@ from .base_model import BaseModel
 from .user import User
 from .student import Student
 from .student import StudentSection
+from .student import StudentGWA
 from .student import StudentRating
 from .student import StudentCharacterRatingCriteria
 from .student import StudentBatch
@@ -33,6 +34,7 @@ __all__ = [
     'User',
     'Student',
     'StudentSection',
+    'StudentGWA',
     'StudentRating',
     'StudentCharacterRatingCriteria',
     'StudentBatch',
