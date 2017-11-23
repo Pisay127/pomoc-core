@@ -50,6 +50,7 @@ class StudentController(object):
                     batch[batch_ctr] = {
                         'batch_year': bat.batch_year
                     }
+                    batch_ctr += 1
 
                 monthly_attendance_ctr = 0
                 monthly_attendance = dict()
@@ -133,6 +134,14 @@ class StudentController(object):
                 }
 
                 rating_ctr += 1
+
+            batch_ctr = 0
+            batch = dict()
+            for bat in student.batch:
+                batch[batch_ctr] = {
+                    'batch_year': bat.batch_year
+                }
+                batch_ctr += 1
 
             monthly_attendance_ctr = 0
             monthly_attendance = dict()
