@@ -44,6 +44,13 @@ class StudentController(object):
 
                     rating_ctr += 1
 
+                batch_ctr = 0
+                batch = dict()
+                for bat in student.batch:
+                    batch[batch_ctr] = {
+                        'batch_year': bat.batch_year
+                    }
+
                 monthly_attendance_ctr = 0
                 monthly_attendance = dict()
                 for month in student.monthly_attendance:
@@ -92,6 +99,7 @@ class StudentController(object):
                     'year_level': student.year_level,
                     'sections': sections,
                     'ratings': ratings,
+                    'batch': batch,
                     'monthly_attendance': monthly_attendance,
                     'statuses': statuses,
                     'subjects': subjects,
@@ -174,6 +182,7 @@ class StudentController(object):
                 'year_level': student.year_level,
                 'sections': sections,
                 'ratings': ratings,
+                'batch': batch,
                 'monthly_attendance': monthly_attendance,
                 'statuses': statuses,
                 'subjects': subjects,
