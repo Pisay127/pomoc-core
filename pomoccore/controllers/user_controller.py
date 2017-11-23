@@ -14,52 +14,92 @@ from pomoccore.utils import misc
 
 
 class UserController(object):
-    @falcon.before(validators.user_exists)
+    @falcon.before(validators.user.exists)
     def on_get(self, req, resp):
-        user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
-
         data = dict()
         data['user'] = dict()
-
         requested_attribs = misc.get_requested_attributes(req.get_json('attributes'))
 
-        if requested_attribs:
-            if 'id' in requested_attribs:
-                data['user']['id'] = user.id_number
+        if req.get_json('user_id') == '__all__':
+            users = User.query.all()
 
-            if 'user_type' in requested_attribs:
-                data['user']['user_type'] = user.user_type
+            user_ctr = 0
+            for user in users:
+                data['user'][user_ctr] = dict()
 
-            if 'username' in requested_attribs:
-                data['user']['username'] = user.username
+                if requested_attribs:
+                    if 'user_id' in requested_attribs:
+                        data['user'][user_ctr]['user_id'] = user.user_id
 
-            if 'first_name' in requested_attribs:
-                data['user']['first_name'] = user.first_name
+                    if 'id_number' in requested_attribs:
+                        data['user'][user_ctr]['id_number'] = user.id_number
 
-            if 'middle_name' in requested_attribs:
-                data['user']['middle_name'] = user.middle_name
+                    if 'user_type' in requested_attribs:
+                        data['user'][user_ctr]['user_type'] = user.user_type
 
-            if 'last_name' in requested_attribs:
-                data['user']['last_name'] = user.last_name
+                    if 'username' in requested_attribs:
+                        data['user'][user_ctr]['username'] = user.username
 
-            if 'age' in requested_attribs:
-                data['user']['age'] = user.age
+                    if 'first_name' in requested_attribs:
+                        data['user'][user_ctr]['first_name'] = user.first_name
 
-            if 'birth_date' in requested_attribs:
-                data['user']['birth_date'] = user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+                    if 'middle_name' in requested_attribs:
+                        data['user'][user_ctr]['middle_name'] = user.middle_name
 
-            if 'profile_picture' in requested_attribs:
-                data['user']['profile_picture'] = user.profile_picture
+                    if 'last_name' in requested_attribs:
+                        data['user'][user_ctr]['last_name'] = user.last_name
+
+                    if 'age' in requested_attribs:
+                        data['user'][user_ctr]['age'] = user.age
+
+                    if 'birth_date' in requested_attribs:
+                        data['user'][user_ctr]['birth_date'] = user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+
+                    if 'profile_picture' in requested_attribs:
+                        data['user'][user_ctr]['profile_picture'] = user.profile_picture
+        else:
+            user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
+
+            if requested_attribs:
+                if 'user_id' in requested_attribs:
+                    data['user']['user_id'] = user.user_id
+
+                if 'id_number' in requested_attribs:
+                    data['user']['id_number'] = user.id_number
+
+                if 'user_type' in requested_attribs:
+                    data['user']['user_type'] = user.user_type
+
+                if 'username' in requested_attribs:
+                    data['user']['username'] = user.username
+
+                if 'first_name' in requested_attribs:
+                    data['user']['first_name'] = user.first_name
+
+                if 'middle_name' in requested_attribs:
+                    data['user']['middle_name'] = user.middle_name
+
+                if 'last_name' in requested_attribs:
+                    data['user']['last_name'] = user.last_name
+
+                if 'age' in requested_attribs:
+                    data['user']['age'] = user.age
+
+                if 'birth_date' in requested_attribs:
+                    data['user']['birth_date'] = user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+
+                if 'profile_picture' in requested_attribs:
+                    data['user']['profile_picture'] = user.profile_picture
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
             'Successful user data retrieval', 'User data successfully gathered.', data
         )
 
-    @falcon.before(validators.validate_access_token)
-    @falcon.before(validators.access_token_requesting_user_exists)
-    @falcon.before(validators.admin_required)
-    @falcon.before(validators.user_not_exists)
+    @falcon.before(validators.oauth.access_token_valid)
+    @falcon.before(validators.oauth.access_token_user_exists)
+    @falcon.before(validators.admin.required)
+    @falcon.before(validators.user.not_exists)
     def on_post(self, req, resp):
         id_number = req.get_json('id_number')
         user_type = req.get_json('user_type')
@@ -91,9 +131,9 @@ class UserController(object):
             'User created successfully', 'New user {0} has been created.'.format(username)
         )
 
-    @falcon.before(validators.user_exists)
+    @falcon.before(validators.user.exists)
     def on_put(self, req, resp):
-        user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
+        user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
 
         if 'id_number' in req.json:
             user.id_number = req.get_json('id_number')
@@ -130,9 +170,9 @@ class UserController(object):
             'User updated successfully', 'User {0} has been updated.'.format(user.username)
         )
 
-    @falcon.before(validators.user_exists)
+    @falcon.before(validators.user.exists)
     def on_delete(self, req, resp):
-        user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
+        user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
 
         db.Session.delete(user)
         db.Session.commit()
