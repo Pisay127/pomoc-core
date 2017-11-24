@@ -10,6 +10,8 @@ from pomoccore import db
 from pomoccore import settings
 from pomoccore.models import User
 from pomoccore.models import Subject
+from pomoccore.models import Student
+from pomoccore.models.grouping import Batch
 from pomoccore.models.grouping import Section
 from pomoccore.models.teacher import TeacherPositionList
 from pomoccore.utils.errors import APIBadRequestError
@@ -104,6 +106,26 @@ def section_not_exists(req, resp, resource, params):
         raise APIConflictError('Section already exists', 'Section with the same name already exists.')
     except NoResultFound:
         pass
+
+
+def batch_exists(req, resp, resource, params):
+    if req.get_json('batch_year') == '__all__':  # Denotes that we need all the sections.
+        return
+
+    try:
+        db.Session.query(Batch).filter_by(batch_year=int(req.get_json('batch_year'))).one()
+    except NoResultFound:
+        raise APINotFoundError('Batch could not be found', 'Batch does not exist, or used to be.')
+
+
+def student_exists(req, resp, resource, params):
+    if req.get_json('id') == '__all__':
+        return
+
+    try:
+        db.Session.query(Student).filter_by(student_id=req.get_json('id')).one()
+    except NoResultFound:
+        raise APINotFoundError('Student could not be found', 'Student does not exist, or used to be.')
 
 
 def teacher_position_exists(req, resp, resource, params):

@@ -10,7 +10,7 @@ from pomoccore.utils import response
 
 
 class StudentStatusController(object):
-    @falcon.before(validators.user_exists)
+    @falcon.before(validators.student_exists)
     def on_get(self, req, resp):
         statuses = db.Session.query(StudentStatus).filter_by(
                         student_id=req.get_json('id')
