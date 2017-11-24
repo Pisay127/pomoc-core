@@ -1,0 +1,8 @@
+# Copyright (c) 2017 Pisay127. All rights reserved.
+# See the file 'LICENSE' for the full license governing this code.
+
+import re
+
+
+def get_requested_attributes(attributes):
+    return set(re.split(', ', attributes.strip().lower()))
