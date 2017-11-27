@@ -4,3 +4,4 @@
 from . import user
 from . import oauth
 from . import admin
+from . import section
