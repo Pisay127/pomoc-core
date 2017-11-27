@@ -4,5 +4,5 @@
 import re
 
 
-def get_requested_attributes(attributes):
-    return set(re.split(', ', attributes.strip().lower()))
+def get_requested_scope(scope):
+    return set(re.split(', ', scope.strip().lower()))
