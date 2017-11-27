@@ -97,3 +97,16 @@ class APIConflictError(APIError):
             headers=None,
             code='Ignacio, you buffoon! Add a damn internal status code.'
         )
+
+
+class APIUnprocessableEntityError(APIError):
+    def __init__(self,
+                 title='We need a title, Ignacio!',
+                 description='I told you for the nth time, Ignacio, that we need the error message!'):
+        super(APIUnprocessableEntityError, self).__init__(
+            status=http_status.HTTP_422,
+            title=title,
+            description=description,
+            headers=None,
+            code='Ignacio, you buffoon! Add a damn internal status code.'
+        )
