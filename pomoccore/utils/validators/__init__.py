@@ -5,3 +5,5 @@ from . import user
 from . import oauth
 from . import admin
 from . import section
+from . import teacher
+from . import teacher_position
