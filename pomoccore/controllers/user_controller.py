@@ -10,36 +10,52 @@ from pomoccore.models import Teacher
 from pomoccore.models import Student
 from pomoccore.utils import validators
 from pomoccore.utils import response
+from pomoccore.utils.errors import APIUnprocessableEntityError
 
 
 class UserController(object):
-    @falcon.before(validators.user_exists)
+    @falcon.before(validators.user.exists)
     def on_get(self, req, resp):
-        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
+        data = dict()
+        data['user'] = dict()
 
-        data = {
-            'user': {
-                'id': retrieved_user.id_number,
-                'user_type': retrieved_user.user_type,
-                'username': retrieved_user.username,
-                'first_name': retrieved_user.first_name,
-                'middle_name': retrieved_user.middle_name,
-                'last_name': retrieved_user.last_name,
-                'age': retrieved_user.age,
-                'birth_date': retrieved_user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f'),
-                'profile_picture': retrieved_user.profile_picture
-            }
-        }
+        if req.get_json('user_id') == '__all__':
+            users = User.query.all().order_by(User.last_name.asc(),
+                                              User.first_name.asc(),
+                                              User.middle_name.asc(),
+                                              User.id_number.asc())
+
+            user_ctr = 0
+            for user in users:
+                data['user'][user_ctr] = dict()
+
+                for scope in req.scope:
+                    try:
+                        data['user'][user_ctr][scope] = getattr(user, scope)
+                    except AttributeError:
+                        raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
+                                                          'Scope is not part of the user.')
+                user_ctr += 1
+        else:
+            user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
+
+            data['user'] = dict()
+            for scope in req.scope:
+                try:
+                    data['user'][scope] = getattr(user, scope)
+                except AttributeError:
+                    raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
+                                                      'Scope is not part of the user.')
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
             'Successful user data retrieval', 'User data successfully gathered.', data
         )
 
-    @falcon.before(validators.validate_access_token)
-    @falcon.before(validators.access_token_requesting_user_exists)
-    @falcon.before(validators.admin_required)
-    @falcon.before(validators.user_not_exists)
+    @falcon.before(validators.oauth.access_token_valid)
+    @falcon.before(validators.oauth.access_token_user_exists)
+    @falcon.before(validators.admin.required)
+    @falcon.before(validators.user.not_exists)
     def on_post(self, req, resp):
         id_number = req.get_json('id_number')
         user_type = req.get_json('user_type')
@@ -71,53 +87,38 @@ class UserController(object):
             'User created successfully', 'New user {0} has been created.'.format(username)
         )
 
-    @falcon.before(validators.user_exists)
+    @falcon.before(validators.user.exists)
     def on_put(self, req, resp):
-        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
-
-        if 'id_number' in req.json:
-            retrieved_user.id_number = req.get_json('id_number')
+        user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
 
         # We should not modify the user type. Records will get fucked up.
-
-        if 'username' in req.json:
-            retrieved_user.username = req.get_json('username').strip().lower()
-
-        if 'password' in req.json:
-            retrieved_user.password = req.get_json('password')
-
-        if 'first_name' in req.json:
-            retrieved_user.password = req.get_json('first_name').strip()
-
-        if 'middle_name' in req.json:
-            retrieved_user.middle_name = req.get_json('middle_name').strip()
-
-        if 'last_name' in req.json:
-            retrieved_user.last_name = req.get_json('last_name').strip()
-
-        if 'age' in req.json:
-            retrieved_user.age = req.get_json('age')
-
-        if 'birth_date' in req.json:
-            retrieved_user.birth_date = req.get_json('birth_date')
-
         # NOTE: Handle profile pictures in the future.
 
+        for attrib in req.json:
+            if attrib == 'user_id':
+                continue
+
+            if attrib == 'username':  # Dude, we gotta lowercase the string.
+                user.username = req.get_json(attrib).strip().lower()
+                continue
+
+            setattr(user, attrib, req.get_json(attrib))
+
         db.Session.commit()
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
-            'User updated successfully', 'User {0} has been updated.'.format(retrieved_user.username)
+            'User updated successfully', 'User {0} has been updated.'.format(user.username)
         )
 
-    @falcon.before(validators.user_exists)
+    @falcon.before(validators.user.exists)
     def on_delete(self, req, resp):
-        retrieved_user = db.Session.query(User).filter_by(user_id=req.get_json('id')).one()
+        user = db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
 
-        db.Session.delete(retrieved_user)
+        db.Session.delete(user)
         db.Session.commit()
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code again?',
-            'User deleted successfully', 'User {0} has been deleted.'.format(retrieved_user.username)
+            'User deleted successfully', 'User {0} has been deleted.'.format(user.username)
         )
