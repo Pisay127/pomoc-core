@@ -18,25 +18,33 @@ class TeacherController(object):
     def on_get(self, req, resp):
         data = dict()
         data['teacher'] = dict()
-        if req.get_json('id') == '__all__':
+        if req.get_json('teacher_id') == '__all__':
             teachers = User.query.filter_by(user_type='teacher').all().order_by(User.last_name.asc(),
                                                                                 User.first_name.asc(),
                                                                                 User.middle_name.asc(),
                                                                                 User.id_number.asc())
 
-            teacher_ctr = 0
+            row_ctr = 0
             for teacher in teachers:
-                data['teacher'][teacher_ctr] = {
-                    'teacher_id': teacher.user_id
-                }
+                data['teacher'][row_ctr] = dict()
+                for scope in req.scope:
+                    try:
+                        data['teacher'][row_ctr][scope] = getattr(teacher, scope)
+                    except AttributeError:
+                        raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
+                                                          'Scope is not part of the teacher.')
 
-                teacher_ctr += 1
+                row_ctr += 1
         else:
             teacher = db.Session.query(Teacher).filter_by(teacher_id=req.get_json('teacher_id')).one()
 
-            data['teacher'] = {
-                'teacher_id': teacher.teacher_id
-            }
+            data['teacher'] = dict()
+            for scope in req.scope:
+                try:
+                    data['teacher'][scope] = getattr(teacher, scope)
+                except AttributeError:
+                    raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
+                                                      'Scope is not part of the teacher.')
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
