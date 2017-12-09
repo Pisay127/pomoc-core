@@ -38,8 +38,8 @@ class TeacherPosition(BaseModel):
                         primary_key=True, nullable=False)
     position_id = Column('position_id', BigInteger,
                          ForeignKey('teacher_position_list.id', onupdate='cascade', ondelete='cascade'),
-                         nullable=False)
-    school_year = Column('school_year', Text, nullable=False)
+                         primary_key=True, nullable=False)
+    school_year = Column('school_year', Text, primary_key=True, nullable=False)
 
     def __init__(self, teacher_id, position_name, school_year):
         self.teacher_id = teacher_id
