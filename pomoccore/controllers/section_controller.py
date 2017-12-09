@@ -7,7 +7,7 @@ from pomoccore import db
 from pomoccore.models import Section
 from pomoccore.utils import validators
 from pomoccore.utils import response
-from pomoccore.utils import misc
+from pomoccore.utils.errors import APIUnprocessableEntityError
 
 
 class SectionController(object):
@@ -15,7 +15,6 @@ class SectionController(object):
     def on_get(self, req, resp):
         data = dict()
         data['section'] = dict()
-        requested_attribs = misc.get_requested_attributes(req.get_json('attributes'))
         if req.get_json('section_id') == '__all__':
             sections = Section.query.all()
 
@@ -23,31 +22,24 @@ class SectionController(object):
             for section in sections:
                 data['section'][section_ctr] = dict()
 
-                if requested_attribs:
-                    if 'section_id' in requested_attribs:
-                        data['section'][section_ctr]['section_id'] = section.section_id
-
-                    if 'section_name' in requested_attribs:
-                        data['section'][section_ctr]['section_name'] = section.section_name
-
-                    if 'year_level' in requested_attribs:
-                        data['section'][section_ctr]['year_level'] = section.year_level
+                for scope in req.scope:
+                    try:
+                        data['section'][section_ctr][scope] = getattr(section, scope)
+                    except AttributeError:
+                        raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
+                                                          'Scope is not part of the user.')
 
                 section_ctr += 1
         else:
             section = db.Session.query(Section).filter_by(section_id=req.get_json('section_id')).one()
 
             data['section'] = dict()
-
-            if requested_attribs:
-                if 'section_id' in requested_attribs:
-                    data['section']['section_id'] = section.section_id
-
-                if 'section_name' in requested_attribs:
-                    data['section']['section_name'] = section.section_name
-
-                if 'year_level' in requested_attribs:
-                    data['section']['year_level'] = section.year_level
+            for scope in req.scope:
+                try:
+                    data['section'][scope] = getattr(section, scope)
+                except AttributeError:
+                    raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
+                                                      'Scope is not part of the user.')
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
