@@ -40,14 +40,13 @@ class SubjectOffering(BaseModel):
     instructor_id = Column('instructor_id', BigInteger,
                            ForeignKey('teacher_account.id'),
                            primary_key=True, nullable=False)
-    schedule = Column('schedule', Text, nullable=False)
+    schedule = Column('schedule', Text, primary_key=True, nullable=False)
 
     students = relationship('StudentSubject', backref='subject_offering')
 
-    def __init__(self, subject_name, school_year, year_level, instructor_id, schedule):
-        self.subject_name = subject_name
+    def __init__(self, subject_id, school_year, instructor_id, schedule):
+        self.subject_id = subject_id
         self.school_year = school_year
-        self.year_level = year_level
         self.instructor_id = instructor_id
         self.schedule = schedule
 
