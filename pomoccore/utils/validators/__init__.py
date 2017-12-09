@@ -9,3 +9,4 @@ from . import teacher
 from . import teacher_position
 from . import subject
 from . import subject_offering
+from . import student
