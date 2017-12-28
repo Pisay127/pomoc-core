@@ -49,7 +49,7 @@ class SectionController(object):
     @falcon.before(validators.oauth.access_token_valid)
     @falcon.before(validators.oauth.access_token_user_exists)
     @falcon.before(validators.admin.required)
-    @falcon.before(validators.section.not_exists)
+    @falcon.before(validators.section.name_not_exists)
     def on_post(self, req, resp):
         name = req.get_json('section_name')
         year_level = req.get_json('year_level')
