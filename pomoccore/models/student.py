@@ -73,10 +73,9 @@ class StudentSection(BaseModel):
                         primary_key=True, nullable=False)
     school_year = Column('school_year', Text, primary_key=True, nullable=True)
 
-    def __init__(self, student_id, section_id, year_level, school_year):
+    def __init__(self, student_id, section_id, school_year):
         self.student_id = student_id
         self.section_id = section_id
-        self.year_level = year_level
         self.school_year = school_year
 
     def __repr__(self):
@@ -311,13 +310,13 @@ class StudentSubjectPendingGrade(BaseModel):
                                            ondelete='cascade',
                                            onupdate='cascade'),)
 
-    def __init__(self, student_id, subject_id, requesting_teacher_id, school_year, quarter, proposed_quarter):
+    def __init__(self, student_id, subject_id, requesting_teacher_id, school_year, quarter, proposed_grade):
         self.student_id = student_id
         self.subject_id = subject_id
         self.requesting_teacher_id = requesting_teacher_id
         self.school_year = school_year
         self.quarter = quarter
-        self.proposed_grade = proposed_quarter
+        self.proposed_grade = proposed_grade
 
     def __repr__(self):
         return '<StudentSubjectPendingGrade {0} (*{1}) - {2}>'.format(self.subject_name,
