@@ -22,6 +22,14 @@ def exists(req, resp, resource, params):
 
 def not_exists(req, resp, resource, params):
     try:
+        db.Session.query(Section).filter_by(section_id=req.get_json('section_id')).one()
+        raise APIConflictError('Section already exists', 'Section already exists.')
+    except NoResultFound:
+        pass
+
+
+def name_not_exists(req, resp, resource, params):
+    try:
         db.Session.query(Section).filter_by(section_name=req.get_json('section_name')).one()
         raise APIConflictError('Section already exists', 'Section with the same name already exists.')
     except NoResultFound:
