@@ -11,7 +11,7 @@ from pomoccore.utils import response
 from pomoccore.utils.errors import APIUnprocessableEntityError
 
 
-class TeacherController(object):
+class AdminController(object):
     @falcon.before(validators.teacher.exists)
     def on_get(self, req, resp):
         data = dict()
