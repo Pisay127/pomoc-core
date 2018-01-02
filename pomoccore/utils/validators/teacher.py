@@ -23,6 +23,16 @@ def exists(req, resp, resource, params):
         raise APINotFoundError('Teacher could not be found', 'Teacher does not exist, or used to be.')
 
 
+def new_exists(req, resp, resource, params):
+    if req.get_json('new_teacher_id') == '__all__':  # Denotes that we need all the subjects.
+        return
+
+    try:
+        db.Session.query(Teacher).filter_by(teacher_id=int(req.get_json('new_teacher_id'))).one()
+    except NoResultFound:
+        raise APINotFoundError('Teacher could not be found', 'Teacher does not exist, or used to be.')
+
+
 def required(req, resp, resource, params):
     decoded_token = jwt.decode(
         req.get_json('access_token'), settings.SERVER_SECRET, algorithms='HS256', audience='/', issuer='/'
