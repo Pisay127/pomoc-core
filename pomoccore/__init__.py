@@ -27,7 +27,8 @@ class API(falcon.API):
         self.add_route('/settings', misc_controller.VariableSettingsController())
         self.add_route('/oauth', oauth_controller.OAuthController())
         self.add_route('/section', section_controller.SectionController())
-        # Section Advisor controller
+        self.add_route('/section/advisor/year', section_controller.SectionAdvisorByYearController())
+        self.add_route('/section/advisor', section_controller.SectionAdvisorController())
         self.add_route('/student', student_controller.StudentController())
         self.add_route('/student/section', student_controller.StudentSectionController())
         self.add_route('/student/gwa', student_controller.StudentGWAController())
