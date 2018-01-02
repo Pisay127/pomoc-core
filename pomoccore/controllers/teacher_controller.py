@@ -102,6 +102,9 @@ class TeacherPositionController(object):
         position = db.Session.query(TeacherPosition).filter_by(teacher_id=req.get_json('teacher_id')).one()
 
         for attrib in req.json:
+            if attrib == 'access_token':
+                continue
+
             setattr(position, attrib, req.get_json(attrib))
 
         db.Session.commit()
@@ -183,6 +186,9 @@ class TeacherPositionListController(object):
                              .filter_by(position_id=req.get_json('teacher_position_id')).one()
 
         for attrib in req.json:
+            if attrib == 'access_token':
+                continue
+
             setattr(position, attrib, req.get_json(attrib))
 
         db.Session.commit()
