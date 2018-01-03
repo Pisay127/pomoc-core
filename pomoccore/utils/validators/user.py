@@ -25,3 +25,11 @@ def not_exists(req, resp, resource, params):
         raise APIConflictError('User already exists', 'User with the same username already exists.')
     except NoResultFound:
         pass
+
+
+def not_exists_by_id_number(req, resp, resource, params):
+    try:
+        db.Session.query(User).filter_by(id_number=req.get_json('id_number')).one()
+        raise APIConflictError('User already exists', 'User with the same username already exists.')
+    except NoResultFound:
+        pass

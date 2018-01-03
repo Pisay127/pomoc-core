@@ -52,10 +52,10 @@ class UserController(object):
             'Successful user data retrieval', 'User data successfully gathered.', data
         )
 
-    @falcon.before(validators.oauth.access_token_valid)
-    @falcon.before(validators.oauth.access_token_user_exists)
-    @falcon.before(validators.admin.required)
-    @falcon.before(validators.user.not_exists)
+    #@falcon.before(validators.oauth.access_token_valid)
+    #@falcon.before(validators.oauth.access_token_user_exists)
+    #@falcon.before(validators.admin.required)
+    @falcon.before(validators.user.not_exists_by_id_number)
     def on_post(self, req, resp):
         id_number = req.get_json('id_number')
         user_type = req.get_json('user_type')
@@ -72,6 +72,7 @@ class UserController(object):
         new_user = User(id_number, user_type, username, password, first_name,
                         middle_name, last_name, age, birth_date)
         db.Session.add(new_user)
+        db.Session.commit()
 
         if user_type == 'admin':
             db.Session.add(Admin(new_user.user_id))
