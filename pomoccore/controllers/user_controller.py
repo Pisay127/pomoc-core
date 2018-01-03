@@ -31,7 +31,10 @@ class UserController(object):
 
                 for scope in req.scope:
                     try:
-                        data['user'][user_ctr][scope] = getattr(user, scope)
+                        if scope == 'birth_date':
+                            data['user'][user_ctr][scope] = user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+                        else:
+                            data['user'][user_ctr][scope] = getattr(user, scope)
                     except AttributeError:
                         raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
                                                           'Scope is not part of the user.')
@@ -42,7 +45,10 @@ class UserController(object):
             data['user'] = dict()
             for scope in req.scope:
                 try:
-                    data['user'][scope] = getattr(user, scope)
+                    if scope == 'birth_date':
+                        data['user'][scope] = user.birth_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+                    else:
+                        data['user'][scope] = getattr(user, scope)
                 except AttributeError:
                     raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
                                                       'Scope is not part of the user.')
@@ -52,9 +58,9 @@ class UserController(object):
             'Successful user data retrieval', 'User data successfully gathered.', data
         )
 
-    #@falcon.before(validators.oauth.access_token_valid)
-    #@falcon.before(validators.oauth.access_token_user_exists)
-    #@falcon.before(validators.admin.required)
+    @falcon.before(validators.oauth.access_token_valid)
+    @falcon.before(validators.oauth.access_token_user_exists)
+    @falcon.before(validators.admin.required)
     @falcon.before(validators.user.not_exists_by_id_number)
     def on_post(self, req, resp):
         id_number = req.get_json('id_number')
