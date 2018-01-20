@@ -17,7 +17,8 @@ class SectionController(object):
         data = dict()
         data['section'] = dict()
         if req.get_json('section_id') == '__all__':
-            sections = Section.query.all()
+            sections = db.Session.query(Section).order_by(Section.year_level.asc(),
+                                                          Section.section_name.asc())
 
             section_ctr = 0
             for section in sections:

@@ -20,10 +20,10 @@ class UserController(object):
         data['user'] = dict()
 
         if req.get_json('user_id') == '__all__':
-            users = User.query.all().order_by(User.last_name.asc(),
-                                              User.first_name.asc(),
-                                              User.middle_name.asc(),
-                                              User.id_number.asc())
+            users = db.Session.query(User).all().order_by(User.last_name.asc(),
+                                                          User.first_name.asc(),
+                                                          User.middle_name.asc(),
+                                                          User.id_number.asc())
 
             user_ctr = 0
             for user in users:

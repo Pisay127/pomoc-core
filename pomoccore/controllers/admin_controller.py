@@ -11,26 +11,49 @@ from pomoccore.utils import response
 from pomoccore.utils.errors import APIUnprocessableEntityError
 
 
+class AdminByUsernameController(object):
+    @falcon.before(validators.admin.username_exists)
+    def on_get(self, req, resp):
+        admin = db.Session.query(User).filter_by(username=req.get_json('username')).one()
+
+        data = dict()
+        data['admin'] = dict()
+        for scope in req.scope:
+            try:
+                data['admin'][scope] = getattr(admin, scope)
+            except AttributeError:
+                raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
+                                                  'Scope is not part of the teacher.')
+
+        response.set_successful_response(
+            resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',
+            'Successful admin data retrieval', 'Admin data successfully gathered.', data
+        )
+
+
 class AdminController(object):
-    @falcon.before(validators.teacher.exists)
+    @falcon.before(validators.admin.exists)
     def on_get(self, req, resp):
         data = dict()
         data['admin'] = dict()
         if req.get_json('admin_id') == '__all__':
-            admins = User.query.filter_by(user_type='admin').all().order_by(User.last_name.asc(),
-                                                                            User.first_name.asc(),
-                                                                            User.middle_name.asc(),
-                                                                            User.id_number.asc())
+            admins = db.Session.query(User).filter_by(user_type='admin').order_by(User.last_name.asc(),
+                                                                                  User.first_name.asc(),
+                                                                                  User.middle_name.asc(),
+                                                                                  User.id_number.asc()).all()
 
             row_ctr = 0
             for admin in admins:
                 data['admin'][row_ctr] = dict()
                 for scope in req.scope:
                     try:
-                        data['admin'][row_ctr][scope] = getattr(admin, scope)
+                        if scope == 'birth_date':
+                            data['admin'][row_ctr][scope] = getattr(admin, scope).strftime('%B %d, %Y')
+                        else:
+                            data['admin'][row_ctr][scope] = getattr(admin, scope)
                     except AttributeError:
                         raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
-                                                          'Scope is not part of the teacher.')
+                                                          'Scope is not part of the admin.')
 
                 row_ctr += 1
         else:
@@ -42,7 +65,7 @@ class AdminController(object):
                     data['admin'][scope] = getattr(admin, scope)
                 except AttributeError:
                     raise APIUnprocessableEntityError('Invalid scope \'{0}\''.format(scope),
-                                                      'Scope is not part of the teacher.')
+                                                      'Scope is not part of the admin.')
 
         response.set_successful_response(
             resp, falcon.HTTP_200, 'Ignacio! Where is the damn internal code?',

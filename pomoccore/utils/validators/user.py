@@ -14,7 +14,7 @@ def exists(req, resp, resource, params):
         return
 
     try:
-        db.Session.query(User).filter_by(user_id=int(req.get_json('user_id'))).one()
+        db.Session.query(User).filter_by(user_id=req.get_json('user_id')).one()
     except NoResultFound:
         raise APINotFoundError('User could not be found', 'User does not exist, or used to be.')
 

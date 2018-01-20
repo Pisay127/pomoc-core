@@ -20,6 +20,7 @@ class API(falcon.API):
         super(API, self).__init__(*args, **kwargs)
 
         self.add_route('/admin', admin_controller.AdminController())
+        self.add_route('/admin/username', admin_controller.AdminByUsernameController())
         self.add_route('/batch', batch_controller.BatchController())
         self.add_route('/batch/advisor/year', batch_controller.BatchAdvisorByYearController())
         self.add_route('/batch/advisor', batch_controller.BatchAdvisorController())

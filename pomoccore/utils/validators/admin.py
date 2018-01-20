@@ -7,7 +7,26 @@ from pomoccore import db
 
 from pomoccore import settings
 from pomoccore.models import User
+from pomoccore.models import Admin
 from pomoccore.utils.errors import APIForbiddenError
+
+
+def username_exists(req, resp, resource, params):
+    try:
+        user = db.Session.query(User).filter_by(username=req.get_json('admin_username')).one()
+        db.Session.query(Admin).filter_by(admin_id=user.user_id).one()
+    except NoResultFound:
+        raise APINotFoundError('Admin could not be found', 'Admin does not exist, or used to be.')
+
+
+def exists(req, resp, resource, params):
+    if req.get_json('admin_id') == '__all__':  # Denotes that we need all the subjects.
+        return
+
+    try:
+        db.Session.query(Admin).filter_by(admin_id=int(req.get_json('admin_id'))).one()
+    except NoResultFound:
+        raise APINotFoundError('Admin could not be found', 'Admin does not exist, or used to be.')
 
 
 def required(req, resp, resource, params):

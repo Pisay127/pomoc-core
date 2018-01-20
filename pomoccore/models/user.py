@@ -42,7 +42,7 @@ class User(BaseModel):
         self.middle_name = middle_name.strip()
         self.last_name = last_name.strip()
         self.age = age
-        self.birth_date = datetime.strptime(birth_date, '%Y-%m-%d %H:%M:%S.%f')
+        self.birth_date = birth_date.strip()
 
         if profile_picture:
             self.profile_picture = profile_picture
